@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Software
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -16,9 +16,9 @@
  * ***********************************************************************
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Tickets Extends CI_Controller
+class Tickets extends CI_Controller
 {
     public function __construct()
     {
@@ -69,7 +69,7 @@ class Tickets Extends CI_Controller
             $row[] = $ticket->created;
             $row[] = '<span class="st-' . $ticket->status . '">' . $this->lang->line($ticket->status) . '</span>';
 
-            $row[] = '<a href="' . base_url('tickets/thread/?id=' . $ticket->id) . '" class="btn btn-success btn-xs"><i class="icon-file-text"></i> '.$this->lang->line('View').'</a>';
+            $row[] = '<a href="' . base_url('tickets/thread/?id=' . $ticket->id) . '" class="btn btn-success btn-xs"><i class="icon-file-text"></i> ' . $this->lang->line('View') . '</a>';
 
 
             $data[] = $row;
@@ -117,35 +117,66 @@ class Tickets Extends CI_Controller
                 }
             }
 
-            if ($flag) {
+           if ($flag) {
 
+                $title = $this->input->post('title');
                 $message = $this->input->post('content');
-                $attach = $_FILES['userfile']['name'];
-                if ($attach) {
-                    $config['upload_path'] = '../userfiles/support';
-                    $config['allowed_types'] = 'docx|docs|txt|pdf|xls|png|jpg|gif';
-                    $config['max_size'] = 3000;
-                    $config['file_name'] = time() . $attach;
-                    $this->load->library('upload', $config);
+                $attach = $_FILES['userfile'];
 
-                    if (!$this->upload->do_upload('userfile')) {
-                        $data['response'] = 0;
-                        $data['responsetext'] = 'File Upload Error';
+                if ($attach['name'][0]) {
 
-                    } else {
-                        $data['response'] = 1;
-                        $data['responsetext'] = 'Reply Added Successfully.';
-                        $filename = $this->upload->data()['file_name'];
-                        $this->ticket->addreply($thread_id, $message, $filename);
+
+                    $data = array();
+
+                    $countfiles = count($_FILES['userfile']['name']);
+
+
+                    for ($i = 0; $i < $countfiles; $i++) {
+
+                        if (!empty($_FILES['userfile']['name'][$i])) {
+
+
+                            $_FILES['file']['name'] =  $_FILES['userfile']['name'][$i];
+                            $_FILES['file']['type'] = $_FILES['userfile']['type'][$i];
+                            $_FILES['file']['tmp_name'] = $_FILES['userfile']['tmp_name'][$i];
+                            $_FILES['file']['error'] = $_FILES['userfile']['error'][$i];
+                            $_FILES['file']['size'] = $_FILES['userfile']['size'][$i];
+
+
+                            $config['upload_path'] = '../userfiles/support';
+                            $config['allowed_types'] = 'docx|docs|txt|pdf|xls|png|jpg|gif';
+                            $config['max_size'] = 3000;
+                            $config['file_name'] =  rand(9,999).time().$_FILES['userfile']['name'][$i];
+
+
+                            //Load upload library
+                            $this->load->library('upload', $config);
+
+                            // File upload
+                            if ($this->upload->do_upload('file')) {
+                                // Get data about the file
+                                $uploadData = $this->upload->data();
+                                $filename = $uploadData['file_name'];
+                                // Initialize array
+                                $data['filenames'][] = $filename;
+                            } else {
+                                $data['response'] = 0;
+                                $data['responsetext'] = 'File Upload Error';
+                            }
+                        }
                     }
-                } else {
+                      $this->ticket->addreply($thread_id, $message,$data['filenames']);
+                    $data['response'] = 1;
+                    $data['responsetext'] = 'Reply Submitted Successfully.';
+                }
+ else {
                     $this->ticket->addreply($thread_id, $message, '');
                     $data['response'] = 1;
-                    $data['responsetext'] = 'Reply Added Successfully.';
+                    $data['responsetext'] = 'Reply Submitted Successfully.';
                 }
+            }
 
-
-            } else {
+         else {
 
                 $data['response'] = 0;
                 $data['responsetext'] = 'Captcha Error!';
@@ -178,9 +209,7 @@ class Tickets Extends CI_Controller
         $flag = true;
         $data['captcha_on'] = $this->captcha;
         $data['captcha'] = $this->general->public_key()->recaptcha_p;
-
         $this->load->helper(array('form'));
-
 
         $data['response'] = 3;
         $head['usernm'] = '';
@@ -205,26 +234,55 @@ class Tickets Extends CI_Controller
 
                 $title = $this->input->post('title');
                 $message = $this->input->post('content');
-                $attach = $_FILES['userfile']['name'];
+                $attach = $_FILES['userfile'];
+
+
                 if ($attach) {
-                    $config['upload_path'] = '../userfiles/support';
-                    $config['allowed_types'] = 'docx|docs|txt|pdf|xls|png|jpg|gif';
-                    $config['max_size'] = 3000;
-                    $config['file_name'] = time() . $attach;
-                    $this->load->library('upload', $config);
 
-                    if (!$this->upload->do_upload('userfile')) {
-                        $data['response'] = 0;
-                        $data['responsetext'] = 'File Upload Error';
+                    $data = array();
 
-                    } else {
-                        $data['response'] = 1;
-                        $data['responsetext'] = 'Ticket Submitted Successfully.';
-                        $filename = $this->upload->data()['file_name'];
-                        $this->ticket->addticket($title, $message, $filename);
+                    $countfiles = count($_FILES['userfile']['name']);
+
+
+                    for ($i = 0; $i < $countfiles; $i++) {
+
+                        if (!empty($_FILES['userfile']['name'][$i])) {
+
+
+                            $_FILES['file']['name'] =  $_FILES['userfile']['name'][$i];
+                            $_FILES['file']['type'] = $_FILES['userfile']['type'][$i];
+                            $_FILES['file']['tmp_name'] = $_FILES['userfile']['tmp_name'][$i];
+                            $_FILES['file']['error'] = $_FILES['userfile']['error'][$i];
+                            $_FILES['file']['size'] = $_FILES['userfile']['size'][$i];
+
+
+                            $config['upload_path'] = '../userfiles/support';
+                            $config['allowed_types'] = 'docx|docs|txt|pdf|xls|png|jpg|gif';
+                            $config['max_size'] = 3000;
+                            $config['file_name'] =  rand(9,999).time().$_FILES['userfile']['name'][$i];
+
+
+                            //Load upload library
+                            $this->load->library('upload', $config);
+
+                            // File upload
+                            if ($this->upload->do_upload('file')) {
+                                // Get data about the file
+                                $uploadData = $this->upload->data();
+                                $filename = $uploadData['file_name'];
+                                // Initialize array
+                                $data['filenames'][] = $filename;
+                            } else {
+                                $data['response'] = 0;
+                                $data['responsetext'] = 'File Upload Error';
+                            }
+                        }
                     }
-
-                } else {
+                      $this->ticket->addticket($title, $message,$data['filenames']);
+                    $data['response'] = 1;
+                    $data['responsetext'] = 'Ticket Submitted Successfully.';
+                }
+ else {
                     $this->ticket->addticket($title, $message, '');
                     $data['response'] = 1;
                     $data['responsetext'] = 'Ticket Submitted Successfully.';

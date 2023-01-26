@@ -105,7 +105,7 @@ $(document).ready(function () {
 
 
 });
-//make payment 
+//make payment
 
 
 //part

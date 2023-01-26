@@ -850,13 +850,11 @@ class User extends CI_Controller
 
             public function update_address($id = '')
     {
-           is_login();
-            $id = $this->session->userdata('user_details')[0]->cid;
-
-              $name = $this->input->post('name',true);
+        is_login();
+        $id = $this->session->userdata('user_details')[0]->cid;
+        $name = $this->input->post('name',true);
         $company = $this->input->post('company',true);
         $phone = $this->input->post('phone',true);
-
         $address = $this->input->post('address',true);
         $city = $this->input->post('city',true);
         $region = $this->input->post('region',true);

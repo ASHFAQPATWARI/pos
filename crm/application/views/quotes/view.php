@@ -5,7 +5,18 @@
 
             <div class="message"></div>
         </div>
+<?php
 
+if($this->session->flashdata('item')) {
+$message = $this->session->flashdata('item');
+?>
+<div class="alert alert-info"><?php echo $message['message']; ?>
+
+</div>
+<?php
+}
+
+?>
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-block">
