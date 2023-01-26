@@ -1,4 +1,6 @@
 {
- "version": "6.0",
- "build": "119"
+ "version": "8.1",
+ "build": "183",
+ "system_id": "%read_system_id%",
+ "log_id": "%generate_log_id%"
 }
