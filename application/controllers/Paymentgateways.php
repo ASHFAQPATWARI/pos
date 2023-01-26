@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -80,14 +80,18 @@ class Paymentgateways extends CI_Controller
 
     public function settings()
     {
+        $this->load->model('plugins_model', 'plugins');
         if ($this->input->post()) {
 
             $id = $this->input->post('account');
             $enable = $this->input->post('enable');
             $bank_enable = $this->input->post('bank');
             $pos_list = $this->input->post('pos_list');
+            $auto_debit = $this->input->post('auto_debit');
 
             $this->billing->payment_settings($id, $enable, $bank_enable);
+
+              $this->plugins->m_update_api(69, null, $auto_debit,null,null,null,null, false);
 
             if ($pos_list != PAC) {
                 $config_file_path = APPPATH . "config/constants.php";
@@ -97,6 +101,8 @@ class Paymentgateways extends CI_Controller
             }
 
         } else {
+
+            $data['current'] = $this->plugins->universal_api(69);
             $this->load->model('accounts_model');
             $data['acclist'] = $this->accounts_model->accountslist();
             $data['online_pay'] = $this->billing->online_pay_settings();

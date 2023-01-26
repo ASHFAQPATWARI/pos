@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -159,7 +159,7 @@ class Cronjob_model extends CI_Model
 
         $config = 0;
 
-		$this->db->select('id,tid');       
+		$this->db->select('id,tid');
         $this->db->from('geopos_invoices');
         $this->db->order_by('id', 'DESC');
         $this->db->limit(1);
@@ -177,7 +177,7 @@ class Cronjob_model extends CI_Model
 
         $result_t = $query->row_array();
         $last = $result_t['tid'];
-        
+
 
         if ($config == 0) {
             $duedate = date('Y-m-d');

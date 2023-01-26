@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -267,7 +267,7 @@ class Billing extends CI_Controller
             $data['products'] = $this->quote->quote_products($tid);
             $data['employee'] = $this->quote->employee($data['invoice']['eid']);
             $data['round_off'] = $this->custom->api_config(4);
-            $data['general'] = array('title' => $this->lang->line('Quote'), 'person' => $this->lang->line('Customer'), 'prefix' => prefix(1), 't_type' => 2);
+            $data['general'] = array('title' => $this->lang->line('Quote'), 'person' => $this->lang->line('Customer'), 'prefix' => prefix(1), 't_type' => 1);
 
             ini_set('memory_limit', '64M');
 

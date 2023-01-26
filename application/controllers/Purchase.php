@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -35,6 +35,8 @@ class Purchase extends CI_Controller
 
         }
         $this->li_a = 'stock';
+        //exit('Under Dev Mode');
+
 
     }
 
@@ -187,7 +189,7 @@ class Purchase extends CI_Controller
                 $amt = numberClean($product_qty[$key]);
 
                 if ($product_id[$key] > 0) {
-                    if ($this->input->post('update_stock') == 'yes') {
+                    if ($this->input->post('update_stock') == 'yes' AND $this->aauth->premission(14)) {
 
                         $this->db->set('qty', "qty+$amt", FALSE);
                         $this->db->where('pid', $product_id[$key]);
@@ -222,6 +224,7 @@ class Purchase extends CI_Controller
         } else {
             $this->db->trans_rollback();
         }
+
 
 
     }

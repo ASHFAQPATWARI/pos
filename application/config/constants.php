@@ -25,10 +25,10 @@ defined('EXIT__AUTO_MIN') OR define('EXIT__AUTO_MIN', 9); // lowest automaticall
 defined('EXIT__AUTO_MAX') OR define('EXIT__AUTO_MAX', 225); // highest automatically-assigned error code
 require_once('define_pre.php');
 define('LTR', 'ltr');
-define('GST_INCL', 'inclusive');
-define('POSV', '2');
+define('GST_INCL', 'yes');
+define('POSV', '1');
 define('INVV', '1');
-define('BDATA', '1');
+define('BDATA', '0');
 define('CUSTOM', '1');
 define('MENU', '0');
 define('PAC', '1');

@@ -1,3 +1,4 @@
+<?php //extended open  version  ?>
 <form method="post" id="data_form">
     <div class="row ">
         <div class="col-md-6 card p-mobile">
@@ -129,20 +130,22 @@
                 </div>
                 <hr>
 
-     <?php if($emp['key1']) { ?>
-                      <div class="col"> <div class="form-group form-group-sm text-g">
-                    <label for="employee"><?php echo $this->lang->line('Employee') ?></label>
+                <?php if ($emp['key1']) { ?>
+                    <div class="col">
+                        <div class="form-group form-group-sm text-g">
+                            <label for="employee"><?php echo $this->lang->line('Employee') ?></label>
 
-                            <select id="employee" name="employee" class="form-control form-control-sm" >
-                            <?php
-                            foreach ($employee as $row) {
-                                $cid = $row['id'];
-                                $title = $row['name'];
-                                echo "<option value='$cid'>$title</option>";
-                            }
-                            ?>
-                        </select></div></div>
-                    <?php } ?>
+                            <select id="employee" name="employee" class="form-control form-control-sm">
+                                <?php
+                                foreach ($employee as $row) {
+                                    $cid = $row['id'];
+                                    $title = $row['name'];
+                                    echo "<option value='$cid'>$title</option>";
+                                }
+                                ?>
+                            </select></div>
+                    </div>
+                <?php } ?>
                 <div class="row mt-1">
                     <div class="col-md-12 text-center">
                         <a href="#" class="possubmit btn btn-lg btn-cyan sub-btn" data-type="6"
@@ -230,7 +233,7 @@
                                         onchange="changeDiscountFormat(this.value)"
                                         id="discountFormat">
 
-                                    <?php echo $this->common->disclist(true) ?>
+                                    <?php echo $this->common->disclist() ?>
                                 </select>
 
                             </div>
@@ -377,18 +380,19 @@
         </div>
     </div>
     </div>
-    <input type="hidden" value="pos_invoices/action" id="action-url">
+    <input type="hidden" value="pos_invoices/action?v2=true" id="action-url">
     <input type="hidden" value="search" id="billtype">
     <input type="hidden" value="0" name="counter" id="ganak">
+
     <input type="hidden" value="<?php echo $this->config->item('currency'); ?>" name="currency">
     <input type="hidden" value="<?= $taxdetails['handle']; ?>" name="taxformat" id="tax_format">
     <input type="hidden" value="<?= $taxdetails['format']; ?>" name="tax_handle" id="tax_status">
     <input type="hidden" value="yes" name="applyDiscount" id="discount_handle">
-    <input type="hidden" value="<?= $this->common->disc_status(true)['disc_format']; ?>" name="discountFormat"
+    <input type="hidden" value="<?= $this->common->disc_status()['disc_format']; ?>" name="discountFormat"
            id="discount_format">
-    <input type="hidden" value="<?= amountFormat_general($this->common->disc_status(true)['ship_rate']); ?>" name="shipRate"
+    <input type="hidden" value="<?= amountFormat_general($this->common->disc_status()['ship_rate']); ?>" name="shipRate"
            id="ship_rate">
-    <input type="hidden" value="<?= $this->common->disc_status(true)['ship_tax']; ?>" name="ship_taxtype"
+    <input type="hidden" value="<?= $this->common->disc_status()['ship_tax']; ?>" name="ship_taxtype"
            id="ship_taxtype">
     <input type="hidden" value="0" name="ship_tax" id="ship_tax">
 </form>
@@ -526,27 +530,27 @@
                                 </div>
                             </div>
 
-                                <?php
-                                   if(is_array($custom_fields_c)){
-                                    foreach ($custom_fields_c as $row) {
-                                        if ($row['f_type'] == 'text') { ?>
-                                            <div class="form-group row">
+                            <?php
+                            if (is_array($custom_fields_c)) {
+                                foreach ($custom_fields_c as $row) {
+                                    if ($row['f_type'] == 'text') { ?>
+                                        <div class="form-group row">
 
-                                                <label class="col-sm-2 col-form-label"
-                                                       for="docid"><?= $row['name'] ?></label>
+                                            <label class="col-sm-2 col-form-label"
+                                                   for="docid"><?= $row['name'] ?></label>
 
-                                                <div class="col-sm-8">
-                                                    <input type="text" placeholder="<?= $row['placeholder'] ?>"
-                                                           class="form-control margin-bottom b_input"
-                                                           name="custom[<?= $row['id'] ?>]">
-                                                </div>
+                                            <div class="col-sm-8">
+                                                <input type="text" placeholder="<?= $row['placeholder'] ?>"
+                                                       class="form-control margin-bottom b_input"
+                                                       name="custom[<?= $row['id'] ?>]">
                                             </div>
+                                        </div>
 
 
-                                        <?php }
-                                    }
-                                   }
-                                    ?>
+                                    <?php }
+                                }
+                            }
+                            ?>
 
 
                         </div>
@@ -633,7 +637,7 @@
                         </div>
                     </div>
 
-                    <input type="hidden" value="pos_invoices/action" id="pos_action-url">
+                    <input type="hidden" value="pos_invoices/action?v2=true'" id="pos_action-url">
                 </form>
 
 
@@ -902,6 +906,28 @@
 
         </div>
     </div>
+</div><div id="pos_print" class="modal fade" role="dialog">
+    <div class="modal-dialog ">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Legacy Print Mode</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body border_no_print" id="print_section">
+                <embed src="<?= base_url('assets/images/ssl-seal.png') ?>"
+                       type="application/pdf" height="600px" width="470" id="loader_pdf"
+                ">
+                <input id="loader_file" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
 </div>
 <script type="text/javascript">
     $.ajax({
@@ -931,7 +957,7 @@
     update_register();
     $(".possubmit").on("click", function (e) {
         e.preventDefault();
-        var o_data = $("#data_form").serialize() + '&type=' + $(this).attr('data-type');
+        var o_data = $("#data_form").serialize() + '&type=' + $(this).attr('data-type')+ '&v2=true';
         var action_url = $('#action-url').val();
         addObject(o_data, action_url);
     });
@@ -982,7 +1008,7 @@
         $("#notify .message").html("<strong>Processing</strong>: .....");
         $("#notify").removeClass("alert-danger").addClass("alert-primary").fadeIn();
         $("html, body").animate({scrollTop: $('#notify').offset().top - 100}, 1000);
-        var o_data = $("#data_form").serialize() + '&' + $("#card_data").serialize() + '&type=' + $(this).attr('data-type');
+        var o_data = $("#data_form").serialize() + '&' + $("#card_data").serialize() + '&type=' + $(this).attr('data-type')+ '&v2=true';
         var action_url = $('#action-url').val();
         addObject(o_data, action_url);
         update_register();
@@ -993,7 +1019,7 @@
         $("#notify .message").html("<strong>Processing</strong>: .....");
         $("#notify").removeClass("alert-danger").addClass("alert-primary").fadeIn();
         $("html, body").animate({scrollTop: $('#notify').offset().top - 100}, 1000);
-        var o_data = $("#data_form").serialize() + '&p_amount=' + accounting.unformat($('#p_amount').val(), accounting.settings.number.decimal) + '&p_method=' + $("#p_method option:selected").val() + '&type=' + $(this).attr('data-type')+ '&account=' + $("#p_account option:selected").val() + '&employee=' + $("#employee option:selected").val();
+        var o_data = $("#data_form").serialize() + '&p_amount=' + accounting.unformat($('#p_amount').val(), accounting.settings.number.decimal) + '&p_method=' + $("#p_method option:selected").val() + '&type=' + $(this).attr('data-type') + '&account=' + $("#p_account option:selected").val() + '&employee=' + $("#employee option:selected").val()+ '&v2=true';
         var action_url = $('#action-url').val();
         addObject(o_data, action_url);
         setTimeout(
@@ -1001,13 +1027,40 @@
                 update_register();
             }, 3000);
     });
-        $('#pos_basic_print').on("click", function (e) {
+       var file_id;
+    $(document.body).on('click', '.print_image', function (e) {
+
+        e.preventDefault();
+
+        var inv_id = $(this).attr('data-inid');
+
+        jQuery.ajax({
+            url: '<?php echo base_url('pos_invoices/invoice_legacy') ?>',
+            type: 'POST',
+            data: 'inv=' + inv_id + '&' + crsf_token + '=' + crsf_hash,
+            dataType: 'json',
+            success: function (data) {
+                file_id= data.file_name;
+                $("#loader_pdf").attr('src','<?= base_url() ?>userfiles/pos_temp/'+data.file_name+'.pdf');
+                $("#loader_file").val(data.file_name);
+            },
+        });
+
+        $('#pos_print').modal('toggle');
+        $("#print_section").printThis({
+            //  beforePrint: function (e) {$('#pos_print').modal('hide');},
+
+            printDelay: 500,
+            afterPrint: clean_data()
+        });
+    });
+    $('#pos_basic_print').on("click", function (e) {
         e.preventDefault();
         $('#basicPay').modal('toggle');
         $("#notify .message").html("<strong>Processing</strong>: .....");
         $("#notify").removeClass("alert-danger").addClass("alert-primary").fadeIn();
         $("html, body").animate({scrollTop: $('body').offset().top - 100}, 1000);
-        var o_data = $("#data_form").serialize() + '&p_amount=' + accounting.unformat($('#p_amount').val(), accounting.settings.number.decimal) + '&p_method=' + $("#p_method option:selected").val() + '&type=' + $(this).attr('data-type') + '&printnow=1'+ '&account=' + $("#p_account option:selected").val() + '&employee=' + $("#employee option:selected").val();
+        var o_data = $("#data_form").serialize() + '&p_amount=' + accounting.unformat($('#p_amount').val(), accounting.settings.number.decimal) + '&p_method=' + $("#p_method option:selected").val() + '&type=' + $(this).attr('data-type') + '&printnow=1' + '&account=' + $("#p_account option:selected").val() + '&employee=' + $("#employee option:selected").val();
         var action_url = $('#action-url').val();
         addObject(o_data, action_url);
         setTimeout(
@@ -1015,12 +1068,27 @@
                 update_register();
             }, 3000);
     });
+
+        function clean_data() {
+        setTimeout(function(){
+        var file_id= $("#loader_file").val();
+        jQuery.ajax({
+            url: '<?php echo base_url('pos_invoices/invoice_clean') ?>',
+            type: 'POST',
+            data: 'file_id=' + file_id + '&' + crsf_token + '=' + crsf_hash,
+            dataType: 'json',
+            success: function (data) {
+
+            },
+        });
+}, 2500);
+
+    }
 </script>
 <!-- Vendor libraries -->
 <script type="text/javascript">
     var $form = $('#payment-form');
     $form.on('submit', payWithCard);
-
     /* If you're using Stripe for payments */
     function payWithCard(e) {
         e.preventDefault();

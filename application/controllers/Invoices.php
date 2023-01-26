@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -82,7 +82,9 @@ class Invoices extends CI_Controller
     //edit invoice
     public function edit()
     {
-
+        if (!$this->aauth->premission(13)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+        }
         $tid = intval($this->input->get('id'));
         $data['id'] = $tid;
         $data['title'] = "Edit Invoice $tid";
@@ -91,7 +93,7 @@ class Invoices extends CI_Controller
         $data['terms'] = $this->invocies->billingterms();
         $data['currency'] = $this->invocies->currencies();
         $data['invoice'] = $this->invocies->invoice_details($tid, $this->limited);
-        if ($data['invoice']['id']) $data['products'] = $this->invocies->invoice_products($tid);
+        if ($data['invoice']['id']) $data['products'] = $this->invocies->items_with_product($tid);
         $head['title'] = "Edit Invoice #$tid";
         $head['usernm'] = $this->aauth->get_user()->username;
         $data['warehouse'] = $this->invocies->warehouses();
@@ -103,6 +105,7 @@ class Invoices extends CI_Controller
          $this->load->library("Common");
           $data['custom_fields_c'] = $this->custom->add_fields(1);
         $data['custom_fields'] = $this->custom->add_fields(2);
+        $data['custom_fields'] = $this->custom->view_edit_fields($tid, 2);
 
 
 
@@ -173,8 +176,27 @@ class Invoices extends CI_Controller
         //Invoice Data
         $bill_date = datefordatabase($invoicedate);
         $bill_due_date = datefordatabase($invocieduedate);
+
+        $this->db->select('tid');
+        $this->db->from('geopos_invoices');
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        $this->db->where('tid', $invocieno);
+        $this->db->where('i_class', 0);
+        $query = $this->db->get();
+        if(@$query->row()->tid){
+            $this->db->select('tid');
+            $this->db->from('geopos_invoices');
+            $this->db->order_by('id', 'DESC');
+            $this->db->limit(1);
+            $this->db->where('i_class', 0);
+            $query = $this->db->get();
+            $invocieno=$query->row()->tid+1;
+        }
+
         $data = array('tid' => $invocieno, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val, 'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'eid' => $emp, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency, 'loc' => $this->aauth->get_user()->loc);
         $invocieno2 = $invocieno;
+		//$data['status']='due';
         if ($this->db->insert('geopos_invoices', $data)) {
             $invocieno = $this->db->insert_id();
             //products
@@ -247,6 +269,40 @@ class Invoices extends CI_Controller
                     "Please choose product from product list. Go to Item manager section if you have not added the products."));
                 $transok = false;
             }
+            $tnote = '#' . $invocieno . '-' ;
+          $d_trans = $this->plugins->universal_api(69);
+        if ($d_trans['key2']) {
+            $t_data = array(
+            'type' => 'Income',
+            'cat' => 'Sales',
+            'payerid' => $customer_id,
+            'method' => 'Auto',
+            'date' => $bill_date,
+            'eid' =>$emp,
+            'tid' => $invocieno,
+            'loc' =>$this->aauth->get_user()->loc
+        );
+
+            $dual = $this->custom->api_config(65);
+            $this->db->select('holder');
+            $this->db->from('geopos_accounts');
+            $this->db->where('id', $dual['key2']);
+            $query = $this->db->get();
+            $account_d = $query->row_array();
+            $t_data['credit'] = 0;
+           $t_data['debit'] = $total;
+           $t_data['type'] = 'Expense';
+            $t_data['acid'] = $dual['key2'];
+            $t_data['account'] = $account_d['holder'];
+            $t_data['note'] = 'Debit ' . $tnote;
+
+            $this->db->insert('geopos_transactions', $t_data);
+            //account update
+            $this->db->set('lastbal', "lastbal-$total", FALSE);
+            $this->db->where('id', $dual['key2']);
+            $this->db->update('geopos_accounts');
+
+        }
             if ($transok) {
                 $validtoken = hash_hmac('ripemd160', $invocieno, $this->config->item('encryption_key'));
                 $link = base_url('billing/view?id=' . $invocieno . '&token=' . $validtoken);
@@ -312,7 +368,7 @@ class Invoices extends CI_Controller
                 $s_cost = $profit['price'] * $profit['qty'];
                 $t_profit += $s_cost - $t_cost;
             }
-            $data = array('type' => 9, 'rid' => $invocieno, 'col1' => rev_amountExchange_s($t_profit, $currency, $this->aauth->get_user()->loc), 'd_date' => $bill_date);
+            $data = array('type' => 9, 'rid' => $invocieno, 'col1' => $t_profit, 'd_date' => $bill_date);
 
             $this->db->insert('geopos_metadata', $data);
 
@@ -435,6 +491,9 @@ class Invoices extends CI_Controller
 
     public function editaction()
     {
+        if (!$this->aauth->premission(13)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+        }
         $customer_id = $this->input->post('customer_id');
         $invocieno = $this->input->post('invocieno');
         $iid = $this->input->post('iid');
@@ -473,6 +532,9 @@ class Invoices extends CI_Controller
         }
         $this->db->trans_start();
         $transok = true;
+          $st_c = 0;
+           $this->load->library("Common");
+
         $bill_date = datefordatabase($invoicedate);
         $bill_due_date = datefordatabase($invocieduedate);
         $data = array('invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val, 'discount' => $total_discount, 'tax' => $total_tax, 'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'items' => 0, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency);
@@ -501,6 +563,7 @@ class Invoices extends CI_Controller
             $product_unit = $this->input->post('unit');
             $product_hsn = $this->input->post('hsn');
             $product_serial = $this->input->post('serial');
+            $product_alert = $this->input->post('alert');
 
             foreach ($pid as $key => $value) {
 
@@ -532,9 +595,16 @@ class Invoices extends CI_Controller
                     $this->db->set('qty', "qty-$amt", FALSE);
                     $this->db->where('pid', $product_id[$key]);
                     $this->db->update('geopos_products');
+
+                                        if (isset($product_alert[$key]) AND (numberClean($product_alert[$key]) - $amt) < 0 and $st_c == 0 and $this->common->zero_stock()) {
+                        echo json_encode(array('status' => 'Error', 'message' => 'Product - <strong>' . $product_name1[$key] . "</strong> - Low quantity. Available stock is  " . $product_alert[$key]));
+                        $transok = false;
+                        $st_c = 1;
+                    }
                 }
                 $itc += $amt;
             }
+
             if ($prodindex > 0) {
                 $this->db->insert_batch('geopos_invoice_items', $productlist);
                 if (count($product_serial) > 0) {
@@ -545,7 +615,7 @@ class Invoices extends CI_Controller
                 $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
                 $this->db->where('id', $iid);
                 $this->db->update('geopos_invoices');
-                echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice has  been updated') . " <a href='view?id=$iid' class='btn btn-info btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . " </a> "));
+         if($transok)    echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice has  been updated') . " <a href='view?id=$iid' class='btn btn-info btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . " </a> "));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' =>
                     $this->lang->line('ERROR')));
@@ -565,13 +635,15 @@ class Invoices extends CI_Controller
                 }
             }
         } else {
-            echo json_encode(array('status' => 'Error', 'message' =>
+                if($transok)   echo json_encode(array('status' => 'Error', 'message' =>
                 "Please add at least one product in invoice"));
             $transok = false;
+
         }
 
 
         if ($transok) {
+            $this->custom->edit_save_fields_data($iid, 2);
             $this->db->trans_complete();
         } else {
             $this->db->trans_rollback();

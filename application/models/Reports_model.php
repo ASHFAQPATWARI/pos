@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -358,9 +358,8 @@ class Reports_model extends CI_Model
         $query = $this->db->get();
         $result = $query->row_array();
         if ($result_e['c_rate'] > 0 AND $result['total'] > 0) {
-            $amount = $result_e['c_rate'] / $result['total'];
-            $amount = $amount * 100;
-            return amountExchange_s($amount, 0, $this->aauth->get_user()->loc);
+            $amount = ($result_e['c_rate'] * $result['total']) / 100;
+            return $amount;
         } else {
             return 0;
         }

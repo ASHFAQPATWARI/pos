@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -23,7 +23,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 function dateformat($input)
 {
     $ci =& get_instance();
-    $date = new DateTime($input);
+    $date = new DateTime($input ?? '');
     $date = $date->format($ci->config->item('dformat'));
     return $date;
 }
@@ -36,21 +36,22 @@ function assets_url($input = '')
 function dateformat_time($input)
 {
     $ci =& get_instance();
-    $date = new DateTime($input);
+    $date = new DateTime($input ?? '');
     $date = $date->format($ci->config->item('dformat') . ' H:i:s');
     return $date;
 }
 
 function datefordatabase($input)
 {
-    $date = new DateTime($input);
+    $date = new DateTime($input ?? '');
     $date = $date->format('Y-m-d H:i:s');
     return $date;
 }
 
 function timefordatabase($input)
 {
-    $time = new DateTime($input);
+
+    $time = new DateTime($input ?? '');
     $time = $time->format('H:i:s');
     return $time;
 }
@@ -91,9 +92,9 @@ function amountFormat($number)
     $row = $query2->row_array();
     //Format money as per country
     if ($row['method'] == 'l') {
-        return $currency . ' ' . @number_format($number, $row['url'], $row['key1'], $row['key2']);
+        return $currency . ' ' . @number_format((float)$number, $row['url'], $row['key1'], $row['key2']);
     } else {
-        return @number_format($number, $row['url'], $row['key1'], $row['key2']) . ' ' . $currency;
+        return @number_format((float)$number, $row['url'], $row['key1'], $row['key2']) . ' ' . $currency;
     }
 
 }
@@ -150,7 +151,7 @@ function amountFormat_s($number)
     $row = $query2->row_array();
     //Format money as per country
 
-    return @number_format($number, $row['url'], $row['key1'], $row['key2']);
+    return @number_format((float)$number, $row['url'], $row['key1'], $row['key2']);
 
 }
 
@@ -162,7 +163,7 @@ function amountFormat_general($number=0)
     $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
     $row = $query2->row_array();
     //Format money as per country
-    $number = @number_format($number, $row['url'], $row['key1'], '');
+    $number = @number_format((float)$number, $row['url'], $row['key1'], '');
     return $number;
 }
 
@@ -214,9 +215,9 @@ function amountExchange($number, $id = 0, $loc = 0)
         $row = $query2->row_array();
         //Format money as per country
         if ($row['method'] == 'l') {
-            return $currency . ' ' . @number_format($number, $row['url'], $row['key1'], $row['key2']);
+            return $currency . ' ' . @number_format((float)$number, $row['url'], $row['key1'], $row['key2']);
         } else {
-            return @number_format($number, $row['url'], $row['key1'], $row['key2']) . ' ' . $currency;
+            return @number_format((float)$number, $row['url'], $row['key1'], $row['key2']) . ' ' . $currency;
         }
     }
 
@@ -282,7 +283,7 @@ function edit_amountExchange_s($number, $id = 0, $loc = 0)
         $row = $query2->row_array();
        // $number = str_replace($row['key2'], "", $number);
         //$number = str_replace($row['key1'], ".", $number);
-        $number = number_format($number, $row['url'], $row['key1'], '');
+        $number = number_format((float)$number, $row['url'], $row['key1'], '');
         return $number;
     }
 

@@ -14,7 +14,12 @@
         ?>];
 
 </script>
-
+<?php if(ENVIRONMENT == 'development') { ?>
+<div class="alert alert-primary alert-danger" style="">
+    <a href="#" class="close" data-dismiss="alert">×</a>
+    <div class="message"><strong>Alert</strong>: Application is running in Development/Debug mode! Set it production mode <a href="<?=base_url('settings/debug') ?>">here</a></div>
+</div>
+<?php } ?>
 <div class="row">
     <div class="col-xl-3 col-lg-6 col-12">
         <div class="card">
