@@ -127,7 +127,7 @@
                 'serverSide': true,
                 'stateSave': true,
                 responsive: true,
-                "lengthMenu": [[100, 250, 500, -1], [100, 250, 500, "All"]],
+                "lengthMenu": [[20, 50, 100, 250, 500, -1], [20, 50, 100, 250, 500, "All"]],
                 <?php datatable_lang();?>
                 'order': [],
                 'ajax': {
@@ -144,10 +144,6 @@
                         'targets': [0],
                         'orderable': false,
                     },
-                    {
-                        'targets': [6],
-                        'orderable': false,
-                    },
                 ],
                 dom: 'Blfrtip',
                 buttons: [
@@ -155,7 +151,7 @@
                         extend: 'excelHtml5',
                         footer: true,
                         exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6]
+                            columns: [1, 2, 3, 4, 5]
                         }
                     }
                 ],

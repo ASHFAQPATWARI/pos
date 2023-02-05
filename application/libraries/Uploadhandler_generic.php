@@ -134,14 +134,14 @@ class Uploadhandler_generic
             'identify_bin' => 'identify',
             'image_versions' => array(
                 // The empty image version key defines options for the original image.
-                // Keep in mind: these image manipulations are inherited by all other image versions from this point onwards. 
+                // Keep in mind: these image manipulations are inherited by all other image versions from this point onwards.
                 // Also note that the property 'no_cache' is not inherited, since it's not a manipulation.
                 '' => array(
                     // Automatically rotate images based on EXIF meta data:
                     'auto_orient' => true
                 ),
                 // You can add arrays to generate different versions.
-                // The name of the key is the name of the version (example: 'medium'). 
+                // The name of the key is the name of the version (example: 'medium').
                 // the array contains the options to apply.
                 /*
                 'medium' => array(
@@ -497,14 +497,17 @@ class Uploadhandler_generic
         while (is_dir($this->get_upload_path($name))) {
             $name = $this->upcount_name($name);
         }
+        //exit($name);
         // Keep an existing filename if this is part of a chunked upload:
-        $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
-        while (is_file($this->get_upload_path($name))) {
-            if ($uploaded_bytes === $this->get_file_size(
-                    $this->get_upload_path($name))) {
-                break;
+        if(isset($content_range[1])) {
+            $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
+            while (is_file($this->get_upload_path($name))) {
+                if ($uploaded_bytes === $this->get_file_size(
+                        $this->get_upload_path($name))) {
+                    break;
+                }
+                $name = $this->upcount_name($name);
             }
-            $name = $this->upcount_name($name);
         }
         return $name;
     }
@@ -788,7 +791,7 @@ class Uploadhandler_generic
             $new_height = $img_height * $scale;
             $dst_x = 0;
             $dst_y = 0;
-            $new_img = imagecreatetruecolor($new_width, $new_height);
+            $new_img = imagecreatetruecolor((int)$new_width, (int)$new_height);
         } else {
             if (($img_width / $img_height) >= ($max_width / $max_height)) {
                 $new_width = $img_width / ($img_height / $max_height);
@@ -818,10 +821,10 @@ class Uploadhandler_generic
                 $dst_y,
                 0,
                 0,
-                $new_width,
-                $new_height,
-                $img_width,
-                $img_height
+				(int)$new_width,
+				(int)$new_height,
+				(int)$img_width,
+				(int) $img_height
             ) && $write_func($new_img, $new_file_path, $image_quality);
         $this->gd_set_image_object($file_path, $new_img);
         return $success;
@@ -1111,7 +1114,7 @@ class Uploadhandler_generic
         }
         if (count($failed_versions)) {
             $file->error = $this->get_error_message('image_resize')
-                . ' (' . implode($failed_versions, ', ') . ')';
+                . ' (' . implode(', ', $failed_versions) . ')';
         }
         // Free memory:
         $this->destroy_image_object($file_path);
@@ -1335,10 +1338,10 @@ class Uploadhandler_generic
         $this->response = $content;
         if ($print_response) {
             $json = json_encode($content);
-            $redirect = stripslashes($this->get_post_param('redirect'));
+            $redirect = stripslashes((string)$this->get_post_param('redirect'));
             if ($redirect && preg_match($this->options['redirect_allow_target'], $redirect)) {
                 $this->header('Location: ' . sprintf($redirect, rawurlencode($json)));
-                return;
+                return true;
             }
             $this->head();
             if ($this->get_server_var('HTTP_CONTENT_RANGE')) {
@@ -1477,7 +1480,7 @@ class Uploadhandler_generic
     protected function basename($filepath, $suffix = null)
     {
         $splited = preg_split('/\//', rtrim($filepath, '/ '));
-        return substr(basename('X' . $splited[count($splited) - 1], $suffix), 1);
+        return substr(basename('X' . $splited[count($splited) - 1],(string) $suffix), 1);
     }
 
     public function filenaam()

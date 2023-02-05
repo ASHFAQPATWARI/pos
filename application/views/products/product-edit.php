@@ -197,16 +197,8 @@
                                 }
                                 ?>
                             </select>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label"
-                           for="weight">Weight</label>
-                        <div class="col-sm-4">
-                            <input type="number" placeholder="Weight"
-                                class="form-control margin-bottom" name="weight"
-                                value="<?php echo amountFormat_general($product['weight']) ?>"
-                                onkeypress="return isNumber(event)">
+
+
                         </div>
                     </div>
                     <div class="form-group row">
@@ -271,20 +263,6 @@
                         </div>
                         <small>Do not change if not applicable</small>
                     </div>
-                    <div class="form-group row">
-
-                        <label class="col-sm-2 control-label"
-                            for="fk_pro_id">Freshkaka Website Product Id</label>
-
-                        <div class="col-sm-2">
-                            <input type="number" placeholder="FK Id"
-                                class="form-control margin-bottom" value="<?php echo $product['fk_pro_id'] ?>" name="fk_pro_id" id="fk_pro_id">
-                        </div>
-                        <div class="col-sm-2">
-                        <input class="form-control select-box" type="text" id="searchProduct" placeholder="Search for names.." title="Type in a name">
-                            <ul id="myUL" style="list-style-type: none;padding: 0;margin: 0;"></ul>
-                        </div>
-                    </div>
                     <?php foreach ($custom_fields as $row) {
                         if ($row['f_type'] == 'text') { ?>
                             <div class="form-group row">
@@ -344,7 +322,6 @@
                         <label class="col-sm-2 col-form-label"></label>
 
                         <div class="col-sm-4">
-                            <button id="editproducsync" class="btn btn-pink margin-bottom">Update Product & Sync</button>
                             <input type="submit" id="submit-data" class="btn btn-success margin-bottom"
                                    value="<?php echo $this->lang->line('Update') ?>"
                                    data-loading-text="Updating...">
@@ -511,90 +488,6 @@
                     }
                 }).prop('disabled', !$.support.fileInput)
                     .parent().addClass($.support.fileInput ? undefined : 'disabled');
-            });
-            
-            $("#searchProduct").keyup(function(){
-                var input, searchVal;
-                input = document.getElementById("searchProduct");
-                searchVal = input.value.toLowerCase();
-                if(searchVal.length >= 4){
-                    $.ajax({
-                        type: "POST",
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Basic c2hvcHBpbmdfb2F1dGhfY2xpZW50OnNob3BwaW5nX29hdXRoX3NlY3JldA==");
-                            request.setRequestHeader("Content-Type", "application/json");
-                        },
-                        url: "https://udaipur.freshkaka.com/api/rest/oauth2/token/client_credentials",
-                        data: {},
-                        processData: false,
-                        success: function(msg) {
-                            $.ajax({
-                                type: "GET",
-                                beforeSend: function(request) {
-                                    request.setRequestHeader("Authorization", "Bearer " + msg.data.access_token);
-                                    request.setRequestHeader("Content-Type", "application/json");
-                                },
-                                url: "https://udaipur.freshkaka.com/api/rest/search/products/"+input.value.toLowerCase(),
-                                processData: false,
-                                success: function(msg) {
-                                    $("#myUL").empty();
-                                    $.map(msg.data, function (item) {
-                                        $("#myUL").append('<li><a data-id="'+ item.product_id + '" id="id_link" href="#">' + item.name +'</a></li>');
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-
-            $(document).on('click', "#id_link", function (e) {
-                e.preventDefault();
-                var id = $(this).data('id');
-                $("#fk_pro_id").val(id);
-            });
-
-            $(document).on('click', "#editproducsync", function (e) {
-                e.preventDefault();
-                
-                var qty = $("#product_qty").val();
-                var fk_pro_id = $("#fk_pro_id").val();
-
-                if(qty === ''){
-                    $("#fk-product-id").val('fill required values');
-                    $("#submit-data").click();
-                    return;
-                }
-                
-                if(fk_pro_id != '' && fk_pro_id != 0){
-                    $.ajax({
-                        type: "POST",
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Basic c2hvcHBpbmdfb2F1dGhfY2xpZW50OnNob3BwaW5nX29hdXRoX3NlY3JldA==");
-                            request.setRequestHeader("Content-Type", "application/json");
-                        },
-                        url: "https://udaipur.freshkaka.com/api/rest/oauth2/token/client_credentials",
-                        data: {},
-                        processData: false,
-                        success: function(msg) {
-                            $.ajax({
-                                type: "POST",
-                                beforeSend: function(request) {
-                                    request.setRequestHeader("Authorization", "Bearer " + msg.data.access_token);
-                                    request.setRequestHeader("Content-Type", "application/json");
-                                },
-                                url: "https://udaipur.freshkaka.com/api/rest/product-pos",
-                                data: JSON.stringify({"quantity":qty,"fk_pro_id":fk_pro_id,"action":"update"}),
-                                processData: false,
-                                success: function(msg) {
-                                    $("#submit-data").click();
-                                }
-                            });
-                        }
-                    });
-                }else{
-                    $("#submit-data").click();
-                }
             });
 
             $(document).on('click', ".aj_delete", function (e) {

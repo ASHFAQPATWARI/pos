@@ -1,110 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Print BarCode</title>
-    <style>  @page {
-            margin: 0 auto;
-            sheet-size: <?= $style['width'] ?>mm  <?= $style['height'] ?>mm;
+    <meta charset="UTF-8">
+    <meta name="Generator" content="EditPlus®">
+    <meta name="Author" content="">
+    <meta name="Keywords" content="">
+    <meta name="Description" content="">
+    <title>Labels</title>
+    <style>
+        body {
+            margin: 0;
+            size: <?= $style['width'] ?>mm <?= $style['height'] ?>mm;
+            font-size: <?= $style['font_size'] ?>pt;
         }
 
-        .text-center {
-            text-align: center;
+        @page {
+            margin: 0;
+            size: <?= $style['width'] ?>mm <?= $style['height'] + 1 ?>mm;
         }
     </style>
+
 </head>
-<body>
-   
-<table cellpadding="<?= $style['padding'] ?>" style="width: 100%">
-    <?php
-    foreach ($products as $lab) {
-        for ($i = 0; $i <= $style['total_rows']; $i++) { ?>
-            <tr>
-                <?php  for ($z =0; $z <= $style['items_per_row']; $z++) { ?>
-                <td style="border: 1px solid;" class="text-center">
-                <strong style="font-size:18px;">Freshkaka</strong><br><br>
-                <?= $lab['product_name'] ?><br>
-                    <?php if ($style['product_code']) echo '<br>' . $style['product_code'] . $lab['product_code'];
-                    if ($style['warehouse_name']) echo '<br>' . $style['warehouse'] ?>
-                    <br><br>
-                    <barcode code="<?= $lab['barcode'] ?>" text="1" class="barcode"
-                             height="<?= $style['bar_height'] ?>"/>
-                    </barcode><br><br>
-                    <br><?php if ($style['store_name']) echo $style['store'] . '<br><br>';
-                    if ($lab['expiry']) echo $this->lang->line('Expiry Date') . ' ' . dateformat($lab['expiry']) . '<br><br>';
-                    ?>
-                    <h3><?php if ($style['product_price']) echo amountExchange($lab['product_price'], 0, $this->aauth->get_user()->loc) . '<br><br>'; ?></h3>
-                    <?php if ($style['extra']) echo '<br>' . $style['extra'] ?>
-                </td>
-<?php } ?>
-                <?php
-                if ($style['items_per_row'] == 'x2') {
 
-                    ?>
-                    <td style="border: 1px solid;" class="text-center">
-                    <strong style="font-size:18px;">Freshkaka</strong><br><br>
-                    <strong><?= $lab['product_name'] ?></strong>
+<body onload="print();">
+    <div>
+        <?php
+
+        $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+
+        switch ($style['b_type']) {
+            case 1:
+                $t = $generator::TYPE_EAN_13;
+                break;
+            case 2:
+                $t = $generator::TYPE_CODE_128;
+                break;
+            case 3:
+                $t = $generator::TYPE_CODE_39;
+                break;
+            case 4:
+                $t = $generator::TYPE_EAN_5;
+                break;
+            case 5:
+                $t = $generator::TYPE_EAN_8;
+                break;
+            case 6:
+                $t = $generator::TYPE_UPC_A;
+                break;
+            case 7:
+                $t = $generator::TYPE_UPC_E;
+                break;
+        }
 
 
-                        <?php if ($style['product_code']) echo '<br>' . $lab['product_code'] ?>
-                        <?php if ($style['warehouse_name']) echo $style['warehouse_name'] . '<br>' . $style['warehouse'] ?>
-                        <br><br>
-                        <barcode code="<?= $lab['barcode'] ?>" text="1" class="barcode"
-                                 height="<?= $style['bar_height'] ?>"/>
-                        </barcode><br><br>
-                        <br> <?php if ($style['store_name']) echo $style['store'] . '<br><br>'; ?>
-                        <?php
-                        if ($lab['expiry']) echo $this->lang->line('Expiry Date') . ' ' . dateformat($lab['expiry']) . '<br><br>';
-                        ?>
-                        <h3><?= amountExchange($lab['product_price'], 0, $this->aauth->get_user()->loc) ?></h3>
-                    </td>
-
-                    <?php
-
+        foreach ($products as $lab) {
+            for ($i = 0; $i <= $style['total_rows']; $i++) {
+                for ($z = 0; $z <= $style['items_per_row']; $z++) {
+                    echo '<div style=" margin: 0;width:' . $style['label_width'] . 'mm;height:' . $style['label_height'] . 'mm;text-align:center;display: inline-block">';
+                    if ($style['product_name'])  echo substr($lab['product_name'], 0, $style['max_char']);
+                    if ($style['product_code']) echo  '<br>' . $lab['product_code'];
+                    echo '<br><img src="data:image/png;base64,' . base64_encode($generator->getBarcode($lab['barcode'], $t)) . '" style=" margin: 0;width:' . $style['bar_width'] . 'mm;height:' . $style['bar_height'] . 'mm;"><br>';
+                    echo  $lab['barcode'] . '<br>';
+                    if ($style['product_price']) echo '<strong>' . amountExchange($lab['product_price'], 0, $this->aauth->get_user()->loc) . ' </strong><br>';
+                    if ($style['extra']) echo '<br>' . $style['extra'];
+                    if ($style['store_name']) echo  substr($style['store'], 0, $style['max_char']) . '<br>';
+                    if ($style['warehouse_name']) echo    substr($style['warehouse'], 0, $style['max_char']);
+                    if ($lab['expiry']) echo '<br>' . $this->lang->line('Expiry Date') . ' ' . dateformat($lab['expiry']);
+                    echo '</div>';
                 }
-                                if ($style['items_per_row'] >  'x2') {
-
-                    ?>
-                    <td style="border: 1px solid;" class="text-center">
-                    <strong style="font-size:18px;">Freshkaka</strong><br><br>
-                    <strong><?= $lab['product_name'] ?></strong>
-
-
-                        <?php if ($style['product_code']) echo '<br>' . $lab['product_code'] ?>
-                        <?php if ($style['warehouse_name']) echo $style['warehouse_name'] . '<br>' . $style['warehouse'] ?>
-                        <br><br>
-                        <barcode code="<?= $lab['barcode'] ?>" text="1" class="barcode"
-                                 height="<?= $style['bar_height'] ?>"/>
-                        </barcode><br><br>
-                        <br> <?php if ($style['store_name']) echo $style['store'] . '<br><br>'; ?>
-                        <?php
-                        if ($lab['expiry']) echo $this->lang->line('Expiry Date') . ' ' . dateformat($lab['expiry']) . '<br><br>';
-                        ?>
-                        <h3><?= amountExchange($lab['product_price'], 0, $this->aauth->get_user()->loc) ?></h3>
-                    </td>
-                    <td style="border: 1px solid;" class="text-center">
-                    <strong style="font-size:18px;">Freshkaka</strong><br><br>
-                    <strong><?= $lab['product_name'] ?></strong><br><?= $lab['product_code'] ?>
-                        <br><?= $style['warehouse'] ?><br><br>
-                        <barcode code="<?= $lab['barcode'] ?>" text="1" class="barcode"
-                                 height="<?= $style['bar_height'] ?>"/>
-                        </barcode><br><br>
-                        <br><?= $style['store'] ?><br><br>
-                        <?php
-                        if ($lab['expiry']) echo $this->lang->line('Expiry Date') . ' ' . dateformat($lab['expiry']) . '<br><br>';
-                        ?>
-                        <h3><?= amountExchange($lab['product_price'], 0, $this->aauth->get_user()->loc) ?></h3>
-                    </td>
-                    <?php
-
-                }
-                ?>
-
-
-            </tr>
-        <?php }
-    } ?>
-
-</table>
+            }
+        }
+        ?></div>
 </body>
+
 </html>

@@ -43,7 +43,6 @@
             <div class="form-group row">
 
                 <label class="col-sm-2 col-form-label"></label>
-
                 <div class="col-sm-4">
                     <input type="submit" id="billing_update" class="btn btn-success margin-bottom"
                            value="<?php echo $this->lang->line('Update') ?>" data-loading-text="Updating...">
@@ -56,7 +55,7 @@
             $allow_url_fopen_success = false;
             $timezone_success = true;
             $mbstring = false;
-            $php_version_required = "7.1";
+            $php_version_required = "8.0";
             $current_php_version = PHP_VERSION;
 
             //check required php version

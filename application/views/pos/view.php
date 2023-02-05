@@ -35,12 +35,12 @@
                                     <a class="dropdown-item"
                                        href="<?php echo 'thermal_pdf?id=' . $invoice['iid']; ?>"><?php echo $this->lang->line('PDF Print') ?></a>
                                     <div class="dropdown-divider"></div>
-                                    <?php if ($printer['val2'] == 'server') {
+                                    <?php if (@$printer['val2'] == 'server') {
                                         echo '<a class="dropdown-item" id="thermal_server"
                                            data-ptid="' . $invoice['iid'] . '"  data-url="' . $printer['val3'] . '">' . $this->lang->line('Thermal Print') . '</a>';
                                     } else {
                                         echo '<a class="dropdown-item" id="thermal_p"
-                                           data-ptid="' . $invoice['iid'] . '"  data-url="' . $printer['val3'] . '">' . $this->lang->line('Thermal Print') . '</a>';
+                                           data-ptid="' . $invoice['iid'] . '"  data-url="' . @$printer['val3'] . '">' . $this->lang->line('Thermal Print') . '</a>';
                                     }
                                     ?>
 
@@ -464,7 +464,7 @@
                         <tr>
                             <th><?php echo $this->lang->line('Date') ?></th>
                             <th><?php echo $this->lang->line('Method') ?></th>
-                            <!--<th><?php echo $this->lang->line('Amount') ?></th>-->
+
                             <th><?php echo $this->lang->line('Debit') ?></th>
                             <th><?php echo $this->lang->line('Credit') ?></th>
 

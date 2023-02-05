@@ -61,6 +61,9 @@
     <?php accounting() ?>
 </head>
 <?php
+$id = $this->aauth->get_user()->lang;
+$this->lang->load($id, $id);
+$this->lang->load('part',$id);
 if (MENU) {
     include_once('header-va.php');
 } else {

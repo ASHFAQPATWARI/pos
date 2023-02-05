@@ -68,10 +68,16 @@
                     <label class="col-sm-2 col-form-label" for="name">Attach </label>
 
                     <div class="col-sm-6">
-                        <input type="file" name="userfile" size="20"/><br>
-                        <small>(docx, docs, txt, pdf, xls, png, jpg, gif)</small>
+
+                        <small>(docx, docs, txt, pdf, xls, png, jpg, gif)</small>  <button class="btn btn-sm btn-blue tr_clone_add"><?php echo $this->lang->line('add_row') ?></button>
                     </div>
                 </div>
+                                <table class="table" id="v_var">
+                                    <tr> <td> </td>
+                                        <td>  <input type="file" name="userfile[]" size="20"/><br></td>
+
+                                    </tr>
+                                </table>
 
                 <?php if ($captcha_on) {
                     echo '<script src="https://www.google.com/recaptcha/api.js"></script>
@@ -104,6 +110,13 @@
 </article>
 <script type="text/javascript">
     $(function () {
+                $(document).on('click', ".tr_clone_add", function (e) {
+        e.preventDefault();
+        var n_row = $('#v_var').find('tbody').find("tr:last").clone();
+
+        $('#v_var').find('tbody').find("tr:last").after(n_row);
+
+    });
         $('.summernote').summernote({
             height: 250,
             toolbar: [

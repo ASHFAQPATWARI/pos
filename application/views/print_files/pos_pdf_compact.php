@@ -80,7 +80,7 @@
     
 <div id='printbox'>
     <!-- <h2 class="header"><?= $loc['cname'] ?></h2> -->
-    <h3 class="cname text-center">FreshKaka</h3>
+    <h3 class="cname text-center"><?= $loc['cname'] ?></h3>
     <div class="text-center">freshkaka.com | +918114408411</div>
     <!-- <div class="text-center"><?= $loc['address'] ?>, <?= $loc['city'] ?>, <?= $loc['country'] ?></div> -->
     <br/>
@@ -95,7 +95,7 @@
             <td><?php echo $this->config->item('prefix') . ' #' . $invoice['tid'] ?></td>
         </tr>
         <tr>
-            <td><?php echo $this->lang->line('Invoice Date') ?></td>
+            <td><?php echo $this->lang->line('Inv Date') ?></td>
             <td><?php date_default_timezone_set('Asia/Kolkata');
             echo dateformat($invoice['invoicedate']) . ' ' . date('h:i:s A') ?><br></td>
         </tr>
@@ -217,13 +217,16 @@
             <td><b><?php echo $this->lang->line('Total Tax') ?></b></td>
             <td class="text-right"><b><?php echo amountExchange($invoice['tax'], $invoice['multi'], $invoice['loc']) ?></b></td>
         </tr>
-        <tr>
+        <?php if($invoice['discount'] != 0){ ?>
+            <tr>
             <td><b><?php echo $this->lang->line('Total Discount') ?></b></td>
             <td class="text-right"><b><?php echo amountExchange($invoice['discount'], $invoice['multi'], $invoice['loc']) ?></b></td>
         </tr>
+        <?php } ?>
+        
 
         <?php if($invoice['shipping'] != 0) { 
-            echo '<tr><td><b>Shipping Tax</b></td><td class="text-right"><b>' . amountExchange($invoice['shipping'], $invoice['multi'], $invoice['loc']) . '</b></td></tr>'; 
+            echo '<tr><td><b>Shipping</b></td><td class="text-right"><b>' . amountExchange($invoice['shipping'], $invoice['multi'], $invoice['loc']) . '</b></td></tr>'; 
         }
         ?>
         <tr>

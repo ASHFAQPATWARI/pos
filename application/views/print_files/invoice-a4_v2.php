@@ -168,7 +168,7 @@
             echo '<strong>' . $loc['cname']; ?></strong><br>
             <?php echo
                 $loc['address'] . '<br>' . $loc['city'] . ', ' . $loc['region'] . '<br>' . $loc['country'] . ' -  ' . $loc['postbox'] . '<br>' . $this->lang->line('Phone') . ': ' . $loc['phone'] . '<br> ' . $this->lang->line('Email') . ': ' . $loc['email'];
-            if ($loc['taxid']) echo '<br>' . $this->lang->line('Tax') . ' ID: ' . $loc['taxid'];
+            if ($loc['taxid']) echo '<br>' . $this->lang->line('TaxID') . ' : ' . $loc['taxid'];
             ?></td>
         <td>
 
@@ -182,7 +182,7 @@
             echo '<strong>' . $invoice['name'] . '</strong><br>';
             if ($invoice['company']) echo $invoice['company'] . '<br>';
             echo $invoice['address'] . '<br>' . $invoice['city'] . ', ' . $invoice['region'] . '<br>' . $invoice['country'] . '-' . $invoice['postbox'] . '<br>' . $this->lang->line('Phone') . ': ' . $invoice['phone'] . '<br>' . $this->lang->line('Email') . ' : ' . $invoice['email'];
-            if ($invoice['taxid']) echo '<br>' . $this->lang->line('Tax') . ' ID: ' . $invoice['taxid'];
+            if ($invoice['taxid']) echo '<br>' . $this->lang->line('TaxID') . ' : ' . $invoice['taxid'];
             if (isset($c_custom_fields)) {
                 echo '<br>';
                 foreach ($c_custom_fields as $row) {

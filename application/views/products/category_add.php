@@ -30,7 +30,7 @@
 
                     <div class="col-sm-6">
                         <input type="text" placeholder="Product Category Short Description"
-                               class="form-control margin-bottom required" name="product_catdesc">
+                               class="form-control margin-bottom" name="product_catdesc">
                     </div>
                 </div>
                 <input type="hidden" value="0" name="cat_type">

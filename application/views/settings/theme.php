@@ -79,16 +79,15 @@
 
         <form method="post" id="product_action" class="form-horizontal">
             <div class="card-body">
-
                 <h5><?php echo $this->lang->line('Theme') ?> Logo</h5>
                 <hr>
 
 
                 <div class="ibox-content no-padding border-left-right">
-                    <img alt="image" id="dpic" class="col-4"
+                    <img alt="image" id="dpic" class="col-4" style="max-width: 100px"
                          src="<?php echo base_url('userfiles/theme/logo-header.png') . '?t=' . rand(5, 999) ?>">
                 </div>
-
+<div id="errorImg"></div>
                 <hr>
                 <p><label for="fileupload">Change Theme Logo </label><input
                             id="fileupload" type="file"
@@ -118,8 +117,15 @@
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
 
+				if(data.result.error) {
+					$('#errorImg').html('<span class="alert alert-danger">'+data.result.error+'</span>');
 
-                $("#dpic").attr('src', '<?php echo base_url() ?>userfiles/theme/' + data.result + '?' + new Date().getTime());
+				} else if(data.result.url) {
+					$('#errorImg').html('');
+					$("#dpic").attr('src', '<?php echo base_url() ?>userfiles/theme/' + data.result.name + '?' + new Date().getTime());
+				}
+
+
 
 
             },

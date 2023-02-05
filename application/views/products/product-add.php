@@ -186,17 +186,6 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label"
-                           for="weight">Weight</label>
-                    <div class="col-sm-4">
-                        
-                        <input type="number" placeholder="Weight"
-                               class="form-control margin-bottom" name="weight"
-                               onkeypress="return isNumber(event)">
-                    </div>
-                </div>
-
 
                 <div class="form-group row">
 
@@ -213,9 +202,9 @@
                         </select>
                     </div>
                     <div class="col-sm-4">
-                        <input type="text" placeholder="BarCode Numeric Digit 123112345671"
+                        <input type="text" placeholder="BarCode"
                                class="form-control margin-bottom" name="barcode"
-                               onkeypress="return isNumber(event)">
+                        >
                         <small>Leave blank if you want auto generated in EAN13.</small>
                     </div>
                 </div>
@@ -242,23 +231,6 @@
                     </div>
                     <small>Do not change if not applicable</small>
                 </div>
-                <div class="form-group row">
-
-                    <label class="col-sm-2 control-label"
-                           for="fk_pro_id">Freshkaka Website Product Id</label>
-
-                    <div class="col-sm-2">
-                        <input type="hidden" placeholder="FK Id"
-                               class="form-control margin-bottom" name="fk_pro_id" id="fk_pro_id">
-                        <input type="number" placeholder="FK Id"
-                               class="form-control margin-bottom" name="fk_pro_id_hidden" id="fk_pro_id_hidden">
-                    </div>
-                    <div class="col-sm-2">
-                        <input class="form-control select-box" type="text" id="searchProduct" placeholder="Search for names.." title="Type in a name">
-                        <ul id="myUL" style="list-style-type: none;padding: 0;margin: 0;"></ul>
-                    </div>
-                </div>
-                
                 <?php
                 foreach ($custom_fields as $row) {
                     if ($row['f_type'] == 'text') { ?>
@@ -306,8 +278,6 @@
                     <label class="col-sm-2 col-form-label"></label>
 
                     <div class="col-sm-4">
-                        <input type="hidden" disabled style="color:red;" type="text" id="fk-product-id">
-                        <button id="addproducsync" class="btn btn-lg btn-pink margin-bottom">Add Product & Sync</button>
                         <input type="submit" id="submit-data" class="btn btn-lg btn-blue margin-bottom"
                                value="<?php echo $this->lang->line('Add product') ?>" data-loading-text="Adding...">
                         <input type="hidden" value="products/addproduct" id="action-url">
@@ -410,6 +380,7 @@
 </div>
 <script src="<?php echo assets_url('assets/myjs/jquery.ui.widget.js'); ?>"></script>
 <script src="<?php echo assets_url('assets/myjs/jquery.fileupload.js') ?>"></script>
+
 <script>
     /*jslint unparam: true */
     /*global window, $ */
@@ -424,8 +395,15 @@
             done: function (e, data) {
                 var img = 'default.png';
                 $.each(data.result.files, function (index, file) {
-                    $('#files').html('<tr><td><a data-url="<?php echo base_url() ?>products/file_handling?op=delete&name=' + file.name + '" class="aj_delete"><i class="btn-danger btn-sm icon-trash-a"></i> ' + file.name + ' </a><img style="max-height:200px;" src="<?php echo base_url() ?>userfiles/product/' + file.name + '"></td></tr>');
-                    img = file.name;
+
+                	if(file.error) {
+						$('#files').html('<tr><td><span class="alert alert-danger">'+file.error+'</span></td></tr>');
+						img = file.name;
+					} else {
+						$('#files').html('<tr><td><a data-url="<?php echo base_url() ?>products/file_handling?op=delete&name=' + file.name + '" class="aj_delete"><i class="btn-danger btn-sm icon-trash-a"></i> ' + file.name + ' </a><img style="max-height:200px;" src="<?php echo base_url() ?>userfiles/product/' + file.name + '"></td></tr>');
+						img = file.name;
+					}
+
                 });
 
                 $('#image').val(img);
@@ -439,47 +417,6 @@
             }
         }).prop('disabled', !$.support.fileInput)
             .parent().addClass($.support.fileInput ? undefined : 'disabled');
-    });
-
-    $("#searchProduct").keyup(function(){
-        var input, searchVal;
-        input = document.getElementById("searchProduct");
-        searchVal = input.value.toLowerCase();
-        if(searchVal.length >= 4){
-            $.ajax({
-                type: "POST",
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Basic c2hvcHBpbmdfb2F1dGhfY2xpZW50OnNob3BwaW5nX29hdXRoX3NlY3JldA==");
-                    request.setRequestHeader("Content-Type", "application/json");
-                },
-                url: "https://udaipur.freshkaka.com/api/rest/oauth2/token/client_credentials",
-                data: {},
-                processData: false,
-                success: function(msg) {
-                    $.ajax({
-                        type: "GET",
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + msg.data.access_token);
-                            request.setRequestHeader("Content-Type", "application/json");
-                        },
-                        url: "https://udaipur.freshkaka.com/api/rest/search/products/"+input.value.toLowerCase(),
-                        processData: false,
-                        success: function(msg) {
-                            $("#myUL").empty();
-                            $.map(msg.data, function (item) {
-                                $("#myUL").append('<li><a data-id="'+ item.product_id + '" id="id_link" href="#">' + item.name +'</a></li>');
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
-    $(document).on('click', "#id_link", function (e) {
-        e.preventDefault();
-        var id = $(this).data('id');
-        $("#fk_pro_id").val(id);
-        $("#fk_pro_id_hidden").val(id);
     });
 
     $(document).on('click', ".aj_delete", function (e) {
@@ -499,79 +436,6 @@
             }
         });
 
-    });
-    
-    $(document).on('click', "#addproducsync", function (e) {
-        e.preventDefault();
-        
-        var name = $("#product_name").val();
-        var qty = $("#product_qty").val();
-        var price = $("#product_price").val();
-
-        if(name === '' || qty === '' || price === ''){
-            $("#fk-product-id").val('fill required values');
-            $("#submit-data").click();
-            return;
-        }
-        var fk_pro_id_hidden = $("#fk_pro_id_hidden").val();
-        if(fk_pro_id_hidden != '' && fk_pro_id_hidden != 0) {
-            console.log('update product');
-            $.ajax({
-                type: "POST",
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Basic c2hvcHBpbmdfb2F1dGhfY2xpZW50OnNob3BwaW5nX29hdXRoX3NlY3JldA==");
-                    request.setRequestHeader("Content-Type", "application/json");
-                },
-                url: "https://udaipur.freshkaka.com/api/rest/oauth2/token/client_credentials",
-                data: {},
-                processData: false,
-                success: function(msg) {
-                    $.ajax({
-                        type: "POST",
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + msg.data.access_token);
-                            request.setRequestHeader("Content-Type", "application/json");
-                        },
-                        url: "https://udaipur.freshkaka.com/api/rest/product-pos",
-                        data: JSON.stringify({"quantity":qty,"fk_pro_id":fk_pro_id_hidden,"action":"update"}),
-                        processData: false,
-                        success: function(msg) {
-                            $("#submit-data").click();
-                        }
-                    });
-                }
-            });
-            return;
-        }
-        
-        $.ajax({
-            type: "POST",
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Basic c2hvcHBpbmdfb2F1dGhfY2xpZW50OnNob3BwaW5nX29hdXRoX3NlY3JldA==");
-                request.setRequestHeader("Content-Type", "application/json");
-            },
-            url: "https://udaipur.freshkaka.com/api/rest/oauth2/token/client_credentials",
-            data: {},
-            processData: false,
-            success: function(msg) {
-                $.ajax({
-                    type: "POST",
-                    beforeSend: function(request) {
-                        request.setRequestHeader("Authorization", "Bearer " + msg.data.access_token);
-                        request.setRequestHeader("Content-Type", "application/json");
-                    },
-                    url: "https://udaipur.freshkaka.com/api/rest/product-pos",
-                    data: JSON.stringify({"quantity":qty,"price":price,"name":name,"action":"add"}),
-                    processData: false,
-                    success: function(msg) {
-                        //console.log(msg.data);
-                        $("#fk_pro_id").val(msg.data);
-                        $("#fk_pro_id_hidden").val(msg.data);
-                        $("#submit-data").click();
-                    }
-                });
-            }
-        });
     });
 
 
@@ -596,12 +460,37 @@
     });
 
 
-    $("#sub_cat").select2();
+    $("#sub_cat").select2({
+
+        ajax: {
+            url: baseurl + 'products/sub_cat?id=<?= @$cat[0]['id'] ?>',
+            dataType: 'json',
+            type: 'POST',
+            quietMillis: 50,
+            data: function (product) {
+                return {
+                    product: product,
+                    '<?=$this->security->get_csrf_token_name()?>': crsf_hash
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.title,
+                            id: item.id
+                        }
+                    })
+                };
+            },
+        }}
+    );
     $("#product_cat").on('change', function () {
         $("#sub_cat").val('').trigger('change');
         var tips = $('#product_cat').val();
         $("#sub_cat").select2({
-
+            allowClear: true,
+            tags: [],
             ajax: {
                 url: baseurl + 'products/sub_cat?id=' + tips,
                 dataType: 'json',
@@ -616,9 +505,11 @@
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {
-                            return {
-                                text: item.title,
-                                id: item.id
+                            if(item.id) {
+                                return {
+                                    text: item.title,
+                                    id: item.id
+                                }
                             }
                         })
                     };

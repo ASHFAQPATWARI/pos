@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -41,8 +41,9 @@ class Tools_model extends CI_Model
         foreach ($this->column_search as $item) // loop column
         {
             $search = $this->input->post('search');
-            $value = $search['value'];
-            if ($value) {
+
+            if ($search) {
+                $value = $search['value'];
 
                 if ($i === 0) {
                     $this->db->group_start();

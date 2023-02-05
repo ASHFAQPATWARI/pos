@@ -110,7 +110,7 @@
                 'stateSave': true,
                 <?php datatable_lang();?>
                 responsive: true,
-                "lengthMenu": [[100, 250, 500, -1], [100, 250, 500, "All"]],
+                "lengthMenu": [[20, 50, 100, 250, 500, -1], [20, 50, 100, 250, 500, "All"]],
                 'order': [],
                 'ajax': {
                     'url': "<?php echo site_url('invoices/ajax_list')?>",

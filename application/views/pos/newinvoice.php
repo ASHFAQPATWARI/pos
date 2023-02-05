@@ -173,8 +173,9 @@
                                                                                 name="coupon_amount"
                                                                                 id="coupon_amount"
                                                                                 value="0"><span
-                                                class="input-group-addon round"> <button
-                                                    class="apply_coupon btn btn-small btn-primary sub-btn"><?php echo $this->lang->line('Apply') ?></button></span>
+                                                class="input-group-addon round"> <input type="button"
+                                                                                        class="apply_coupon btn btn-small btn-primary sub-btn"
+                                                                                        value="<?php echo $this->lang->line('Apply') ?>"></span>
 
 
                                     </div>
@@ -323,17 +324,21 @@
 
 
                         <div class="col-sm-9">
-
-
-                            <div class="position-relative has-icon-left">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <i class="fa fa-barcode p-0"></i>&nbsp;<input type="checkbox"
+                                                                                      aria-label="Enable BarCode"
+                                                                                      value="1" id="bar_only">
+                                    </div>
+                                </div>
                                 <input type="text" class="form-control text-center round mousetrap"
                                        name="product_barcode"
                                        placeholder="Enter Product name, code or scan barcode" id="v2_search_bar"
                                        autocomplete="off" autofocus="autofocus">
-                                <div class="form-control-position">
-                                    <i class="icon-barcode2"></i>
-                                </div>
                             </div>
+
+
                         </div>
                         <div class="col-md-3  grey text-xs-center"><select
                                     id="v2_categories"
@@ -904,12 +909,36 @@
 
     </div>
 </div>
+<div id="pos_print" class="modal fade" role="dialog">
+    <div class="modal-dialog ">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Legacy Print Mode</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body border_no_print" id="print_section">
+                <embed src="<?= base_url('assets/images/ssl-seal.png') ?>"
+                       type="application/pdf" height="600px" width="470" id="loader_pdf"
+                ">
+                <input id="loader_file" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
 <script type="text/javascript">
+    var wait = true;
     $.ajax({
         url: baseurl + 'search_products/v2_pos_search',
         dataType: 'html',
         method: 'POST',
-        data: 'cid=' + $('#v2_categories').val() + '&wid=' + $('#v2_warehouses option:selected').val() + '&' + crsf_token + '=' + crsf_hash,
+        data: 'cid=' + $('#v2_categories').val() + '&wid=' + $('#v2_warehouses option:selected').val() + '&' + crsf_token + '=' + crsf_hash + '&bar=' + $('#bar_only').prop('checked'),
         success: function (data) {
             $('#pos_item').html(data);
 
@@ -1025,6 +1054,53 @@
                 update_register();
             }, 3000);
     });
+    var file_id;
+    $(document.body).on('click', '.print_image', function (e) {
+
+        e.preventDefault();
+
+        var inv_id = $(this).attr('data-inid');
+
+        jQuery.ajax({
+            url: '<?php echo base_url('pos_invoices/invoice_legacy') ?>',
+            type: 'POST',
+            data: 'inv=' + inv_id + '&' + crsf_token + '=' + crsf_hash,
+            dataType: 'json',
+            success: function (data) {
+                file_id= data.file_name;
+                $("#loader_pdf").attr('src','<?= base_url() ?>userfiles/pos_temp/'+data.file_name+'.pdf');
+                $("#loader_file").val(data.file_name);
+            },
+        });
+
+        $('#pos_print').modal('toggle');
+        $("#print_section").printThis({
+            //  beforePrint: function (e) {$('#pos_print').modal('hide');},
+
+            printDelay: 500,
+            afterPrint: clean_data()
+        });
+    });
+
+
+    function clean_data() {
+        setTimeout(function(){
+        var file_id= $("#loader_file").val();
+        jQuery.ajax({
+            url: '<?php echo base_url('pos_invoices/invoice_clean') ?>',
+            type: 'POST',
+            data: 'file_id=' + file_id + '&' + crsf_token + '=' + crsf_hash,
+            dataType: 'json',
+            success: function (data) {
+
+            },
+        });
+}, 2500);
+
+    }
+
+
+
 </script>
 
 <!-- Vendor libraries -->
@@ -1099,6 +1175,25 @@
         });
     })
     $(document).ready(function () {
+
+        if (localStorage.bar_only && localStorage.bar_only != '') {
+            $('#bar_only').attr('checked', 'checked');
+
+        } else {
+            $('#bar_only').removeAttr('checked');
+        }
+
+        $('#bar_only').click(function () {
+
+            if ($('#bar_only').is(':checked')) {
+
+                localStorage.bar_only = $('#bar_only').val();
+            } else {
+                localStorage.bar_only = '';
+            }
+            $('#v2_search_bar').attr('readonly', false);
+        });
+
         Mousetrap.bind('alt+x', function () {
             $('#v2_search_bar').focus();
         });
@@ -1126,31 +1221,51 @@
         });
 
 
+        $('#v2_search_bar').keyup(function (event) {
 
-        $('#v2_search_bar').keypress(function (event) {
+            if (!$(this).attr('readonly')) {
+                //$('#v2_search_bar').keyup(function () {
+                var whr = $('#v2_warehouses option:selected').val();
+                var cat = $('#v2_categories option:selected').val();
+                if (this.value.length > 2) {
+                    $.ajax({
+                        type: "POST",
+                        url: baseurl + 'search_products/v2_pos_search',
+                        data: 'name=' + $(this).val() + '&wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash + '&bar=' + $('#bar_only').prop('checked'),
+                        beforeSend: function () {
+                            $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
+                        },
+                        success: function (data) {
+                            $("#pos_item").html(data);
 
-            if (event.keyCode == 13) {
-                $('#v2_search_bar').attr('readonly', 'readonly');
+                        }
+                    });
 
-                def_timeout(1200).then(function () {
+                }
+            }
+
+            if (event.keyCode == 13 && !$('#v2_search_bar').attr('readonly')) {
+                $('#v2_search_bar').attr('readonly', true);
+                wait = false;
+                def_timeout(1000).then(function () {
                     $('#posp0').click();
 
-                    def_timeout(1000).then(function () {
-                        $('#v2_search_bar').attr('readonly', false);
-                        $('#v2_search_bar').val('');
-                        $('#v2_search_bar').focus();
+                    def_timeout(1800).then(function () {
+
+
                         var whr = $('#v2_warehouses option:selected').val();
                         var cat = $('#v2_categories option:selected').val();
                         $.ajax({
                             type: "POST",
                             url: baseurl + 'search_products/v2_pos_search',
-                            data: 'wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash,
+                            data: 'name=' + $(this).val() + '&wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash + '&bar=' + $('#bar_only').prop('checked'),
                             beforeSend: function () {
                                 $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
                             },
                             success: function (data) {
                                 $("#pos_item").html(data);
-
+                                $('#v2_search_bar').attr('readonly', false);
+                                $('#v2_search_bar').val('');
                             }
 
                         });

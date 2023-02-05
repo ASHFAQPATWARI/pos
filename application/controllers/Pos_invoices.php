@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -20,6 +20,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 require_once APPPATH . 'third_party/vendor/autoload.php';
 require_once APPPATH . 'third_party/qrcode/vendor/autoload.php';
 
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\Writer\PngWriter;
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
@@ -37,6 +41,8 @@ class Pos_invoices extends CI_Controller
     {
         parent::__construct();
         $this->load->model('pos_invoices_model', 'invocies');
+
+        $this->load->model('extended_invoices_model', 'extended_invoice');
         $this->load->library("Aauth");
         $this->load->library("Registerlog");
         $this->load->library("Common");
@@ -44,7 +50,7 @@ class Pos_invoices extends CI_Controller
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
-        if (!$this->aauth->premission(1)) {
+        if (!$this->aauth->premission(12)) {
             exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
         }
         if ($this->aauth->get_user()->roleid == 2) {
@@ -92,7 +98,7 @@ class Pos_invoices extends CI_Controller
         }
 
 
-        if ($this->input->get('v2') or POSV == 2) {
+        if ($this->input->get('v2')=='true' or POSV == 2) {
             $head['s_mode'] = false;
             $this->load->view('fixed/header-pos', $head);
             $this->load->view('pos/newinvoice_v2', $data);
@@ -124,9 +130,16 @@ class Pos_invoices extends CI_Controller
         $this->load->model('plugins_model', 'plugins');
         $data['exchange'] = $this->plugins->universal_api(5);
         $data['cat'] = $this->categories_model->category_list();
-        $data['lastinvoice'] = $this->invocies->lastinvoice();
+        $data['lastinvoice'] = $this->invocies->lastinvoice()+1;
         $data['taxdetails'] = $this->common->taxdetail();
         $data['taxlist'] = $this->common->taxlist($this->config->item('tax'));
+
+
+        $data['emp'] = $this->plugins->universal_api(69);
+        if ($data['emp']['key1']) {
+            $this->load->model('employee_model', 'employee');
+            $data['employee'] = $this->employee->list_employee();
+        }
 
         if ($this->input->get('v2') or POSV == 2) {
             $head['s_mode'] = false;
@@ -146,6 +159,9 @@ class Pos_invoices extends CI_Controller
     {
         if (!$this->registerlog->check($this->aauth->get_user()->id)) {
             redirect('register/create');
+        }
+        if (!$this->aauth->premission(13)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
         }
         $head['s_mode'] = false;
         $this->load->model('categories_model');
@@ -183,13 +199,26 @@ class Pos_invoices extends CI_Controller
         $this->load->view('fixed/footer');
     }
 
+        //invoices list
+    public function extended()
+    {
+        $head['title'] = "Manage Invoices";
+        $head['usernm'] = $this->aauth->get_user()->username;
+        $this->load->view('fixed/header', $head);
+        $this->load->view('pos/extended');
+        $this->load->view('fixed/footer');
+    }
+
     //action
     public function action()
     {
 
+
+        $v2 = $this->input->get('v2');
         $ptype = $this->input->post('type');
         $coupon = $this->input->post('coupon');
         $notes = $this->input->post('notes', true);
+        $draft_id = $this->input->post('draft_id');
         $coupon_amount = 0;
         $coupon_n = '';
         $customer_id = $this->input->post('customer_id');
@@ -276,6 +305,22 @@ class Pos_invoices extends CI_Controller
                 }
             }
 
+            $this->db->select('tid');
+            $this->db->from('geopos_invoices');
+            $this->db->order_by('id', 'DESC');
+            $this->db->limit(1);
+            $this->db->where('tid', $invocieno);
+            $this->db->where('i_class', 1);
+            $query = $this->db->get();
+            if(@$query->row()->tid){
+                $this->db->select('tid');
+                $this->db->from('geopos_invoices');
+                $this->db->order_by('id', 'DESC');
+                $this->db->limit(1);
+                $this->db->where('i_class', 1);
+                $query = $this->db->get();
+                $invocieno=$query->row()->tid+1;
+            }
 
             $data = array('tid' => $invocieno, 'invoicedatetime' => $bill_invoicedatetime, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val, 'total' => $total, 'pmethod' => $pmethod, 'notes' => $notes, 'status' => $status, 'csd' => $customer_id, 'eid' => $emp, 'pamnt' => 0, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency, 'i_class' => 1, 'loc' => $this->aauth->get_user()->loc);
 
@@ -324,7 +369,7 @@ class Pos_invoices extends CI_Controller
                             'subtotal' => rev_amountExchange_s($product_subtotal[$key], $currency, $this->aauth->get_user()->loc),
                             'totaltax' => rev_amountExchange_s($ptotal_tax[$key], $currency, $this->aauth->get_user()->loc),
                             'totaldiscount' => rev_amountExchange_s($ptotal_disc[$key], $currency, $this->aauth->get_user()->loc),
-                            'product_des' => $product_des[$key],
+                            'product_des' => @$product_des[$key],
                             'i_class' => 1,
                             'unit' => $product_unit[$key],
                             'serial' => $product_serial[$key]
@@ -364,7 +409,7 @@ class Pos_invoices extends CI_Controller
                     $this->db->where('id', $invocieno);
                     $this->db->update('geopos_invoices');
 
-                    if (count($product_serial) > 0) {
+                    if (@count($product_serial) > 0) {
                         $this->db->set('status', 1);
                         $this->db->where_in('serial', $product_serial);
                         $this->db->update('geopos_product_serials');
@@ -382,10 +427,10 @@ class Pos_invoices extends CI_Controller
                     $this->load->library("Printer");
                     $printer = $this->printer->check($this->aauth->get_user()->loc);
                     $p_tid = 'thermal_p';
-                    if ($printer['val2'] == 'server') $p_tid = 'thermal_server';
+                    if (@$printer['val2'] == 'server') $p_tid = 'thermal_server';
 
                     echo json_encode(array('status' => 'Success', 'message' =>
-                        $this->lang->line('Invoice Success') . " <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-ticket' aria-hidden='true'></span> PDF  </a> &nbsp; &nbsp;   <a id='$p_tid' data-ptid='$invocieno' data-url='" . $printer['val3'] . "'  class='btn btn-info btn-lg white'><span class='fa fa-ticket' aria-hidden='true'></span> " . $this->lang->line('Thermal Printer') . "  </a> &nbsp; &nbsp; <a target='_blank' href='printinvoice?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-print' aria-hidden='true'></span> A4  </a> &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='fa fa-globe' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> &nbsp;<a href='create' class='btn btn-flickr btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
+                        $this->lang->line('Invoice Success') . " <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-ticket' aria-hidden='true'></span> PDF  </a> &nbsp; &nbsp;   <a id='$p_tid' data-ptid='$invocieno' data-url='" . @$printer['val3'] . "'  class='btn btn-info btn-lg white'><span class='fa fa-ticket' aria-hidden='true'></span> " . $this->lang->line('Thermal Printer') . "  </a> &nbsp; &nbsp;<a href='#' class='btn btn-reddit btn-lg print_image' id='print_image' data-inid='$invocieno'><span class='fa fa-window-restore' aria-hidden='true'></span></a> &nbsp; &nbsp; <a target='_blank' href='printinvoice?id=$invocieno' class='btn btn-blue btn-lg'><span class='fa fa-print' aria-hidden='true'></span> A4  </a> &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='fa fa-eye' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='fa fa-globe' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> &nbsp;<a href='create?v2=$v2' class='btn btn-flickr btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
                 }
                 $this->load->model('billing_model', 'billing');
                 $tnote = '#' . $invocieno_n . '-' . $pmethod;
@@ -406,6 +451,39 @@ class Pos_invoices extends CI_Controller
                         $r_amt3 = $pamnt;
                         break;
                 }
+                $d_trans = $this->plugins->universal_api(69);
+        if ($d_trans['key2']) {
+            $t_data = array(
+            'type' => 'Income',
+            'cat' => 'Sales',
+            'payerid' => $customer_id,
+            'method' => $pmethod,
+            'date' => $bill_date,
+            'eid' =>$emp,
+            'tid' => $invocieno,
+            'loc' =>$this->aauth->get_user()->loc
+        );
+
+            $dual = $this->custom->api_config(65);
+            $this->db->select('holder');
+            $this->db->from('geopos_accounts');
+            $this->db->where('id', $dual['key2']);
+            $query = $this->db->get();
+            $account_d = $query->row_array();
+            $t_data['credit'] = 0;
+           $t_data['debit'] = $total;
+           $t_data['type'] = 'Expense';
+            $t_data['acid'] = $dual['key2'];
+            $t_data['account'] = $account_d['holder'];
+            $t_data['note'] = 'Debit ' . $tnote;
+
+            $this->db->insert('geopos_transactions', $t_data);
+            //account update
+            $this->db->set('lastbal', "lastbal-$total", FALSE);
+            $this->db->where('id', $dual['key2']);
+            $this->db->update('geopos_accounts');
+
+        }
                 if ($pamnt > 0) $this->billing->paynow($invocieno, $pamnt, $tnote, $pmethod, $this->aauth->get_user()->loc, $bill_date, $account);
                 $this->registerlog->update($this->aauth->get_user()->id, $r_amt1, $r_amt2, $r_amt3, 0, $c_amt);
                 if ($promo_flag) {
@@ -618,7 +696,7 @@ class Pos_invoices extends CI_Controller
                 $validtoken = hash_hmac('ripemd160', $invocieno, $this->config->item('encryption_key'));
                 $quckpay = base_url() . "billing/card?id=$invocieno&itype=inv&token=$validtoken&gid=$gateway";
 
-                if ($transok) echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice Success') . " <script type='text/javascript' >window.location.replace('$quckpay');</script><a target='_blank' href='$quckpay' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Pay') . "  </a> &nbsp; &nbsp;    <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Print') . "  </a> &nbsp; &nbsp;    &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='icon-file-text2' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='icon-earth' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> <a href='create' class='btn btn-amber btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
+                if ($transok) echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Invoice Success') . " <script type='text/javascript' >window.location.replace('$quckpay');</script><a target='_blank' href='$quckpay' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Pay') . "  </a> &nbsp; &nbsp;    <a target='_blank' href='thermal_pdf?id=$invocieno' class='btn btn-blue btn-lg'><span class='icon-printer' aria-hidden='true'></span> " . $this->lang->line('Print') . "  </a> &nbsp; &nbsp;    &nbsp; &nbsp; <a href='view?id=$invocieno' class='btn btn-purple btn-lg'><span class='icon-file-text2' aria-hidden='true'></span> " . $this->lang->line('View') . "  </a> &nbsp; &nbsp; <a href='$link' class='btn btn-blue-grey btn-lg'><span class='icon-earth' aria-hidden='true'></span> " . $this->lang->line('Public View') . " </a> <a href='create?v2=$v2' class='btn btn-amber btn-lg'><span class='fa fa-plus-circle' aria-hidden='true'></span> " . $this->lang->line('Create') . "  </a>"));
             }
 
             if ($transok) {
@@ -784,6 +862,10 @@ class Pos_invoices extends CI_Controller
 
 
             }
+            if($draft_id>0){
+                 $this->db->delete('geopos_draft', array('id' => $draft_id));
+                $this->db->delete('geopos_draft_items', array('tid' => $draft_id));
+            }
         }
         //profit calculation
         $t_profit = 0;
@@ -852,6 +934,51 @@ class Pos_invoices extends CI_Controller
             "draw" => $this->input->post('draw'),
             "recordsTotal" => $this->invocies->count_all($this->limited),
             "recordsFiltered" => $this->invocies->count_filtered($this->limited),
+            "data" => $data,
+        );
+
+        //output to json format
+        echo json_encode($output);
+
+    }
+
+    public function extended_ajax_list()
+    {
+        if (!$this->aauth->premission(10)) {
+
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+
+        }
+
+        $list = $this->extended_invoice->get_datatables($this->limited);
+
+        $data = array();
+
+        $no = $this->input->post('start');
+
+        foreach ($list as $invoices) {
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '">&nbsp; ' . $invoices->tid . '</a>';
+            $row[] = $invoices->name;
+            $row[] = dateformat($invoices->invoicedate);
+             $row[] = $invoices->product;
+            $row[] = amountFormat_general($invoices->qty);
+            $row[] = amountExchange($invoices->subtotal, 0, $this->aauth->get_user()->loc);
+            $row[] = amountExchange($invoices->discount, 0, $this->aauth->get_user()->loc);
+            $row[] = amountExchange($invoices->tax, 0, $this->aauth->get_user()->loc);
+
+         //   $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm"  title="Download"><span class="fa fa-download"></span></a>&nbsp;<a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-sm delete-object"><span class="fa fa-trash"></span></a>';
+
+            $data[] = $row;
+        }
+
+
+        $output = array(
+            "draw" => $this->input->post('draw'),
+            "recordsTotal" => $this->extended_invoice->count_all($this->limited),
+            "recordsFiltered" => $this->extended_invoice->count_filtered($this->limited),
             "data" => $data,
         );
 
@@ -955,6 +1082,9 @@ class Pos_invoices extends CI_Controller
 
     public function editaction()
     {
+        if (!$this->aauth->premission(13)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+        }
         $ptype = $this->input->post('type');
         $coupon = $this->input->post('coupon');
         $notes = $this->input->post('notes', true);
@@ -962,7 +1092,7 @@ class Pos_invoices extends CI_Controller
         $coupon_n = '';
         $account = $this->input->post('account', true);
         $customer_id = $this->input->post('customer_id');
-        $invocieno_n = $this->input->post('invocieno');
+        $invocieno_n = $this->input->post('invoiceno');
         $invocieno = $this->input->post('iid');
         $invoicedate = $this->input->post('invoicedate');
         $invocieduedate = $this->input->post('invocieduedate');
@@ -1066,10 +1196,10 @@ class Pos_invoices extends CI_Controller
                         'subtotal' => rev_amountExchange_s($product_subtotal[$key], $currency, $this->aauth->get_user()->loc),
                         'totaltax' => rev_amountExchange_s($ptotal_tax[$key], $currency, $this->aauth->get_user()->loc),
                         'totaldiscount' => rev_amountExchange_s($ptotal_disc[$key], $currency, $this->aauth->get_user()->loc),
-                        'product_des' => $product_des[$key],
+                        'product_des' => $product_des[$key] ?? null,
                         'i_class' => 1,
                         'unit' => $product_unit[$key],
-                        'serial' => $product_serial[$key]
+                        'serial' => $product_serial[$key] ?? null
                     );
 
                     $productlist[$prodindex] = $data;
@@ -1089,12 +1219,11 @@ class Pos_invoices extends CI_Controller
                     $this->db->set(array('discount' => rev_amountExchange_s(amountFormat_general($total_discount), $currency, $this->aauth->get_user()->loc), 'tax' => rev_amountExchange_s(amountFormat_general($total_tax), $currency, $this->aauth->get_user()->loc), 'items' => $itc));
                     $this->db->where('id', $invocieno);
                     $this->db->update('geopos_invoices');
-                    if (count($product_serial) > 0) {
+                    if ($product_serial AND count($product_serial) > 0) {
                         $this->db->set('status', 1);
                         $this->db->where_in('serial', $product_serial);
                         $this->db->update('geopos_product_serials');
                     }
-
                 } else {
                     echo json_encode(array('status' => 'Error', 'message' =>
                         "Please add at least one product in invoice"));
@@ -1106,22 +1235,22 @@ class Pos_invoices extends CI_Controller
                 $tnote = '#' . $invocieno_n . '-' . $pmethod;
                 switch ($pmethod) {
                     case 'Cash' :
-                        $r_amt1 = $p_amount;
+                        $r_amt1 = $diff;
                         $r_amt2 = 0;
                         $r_amt3 = 0;
                         break;
                     case 'Card Swipe' :
                         $r_amt1 = 0;
-                        $r_amt2 = $p_amount;
+                        $r_amt2 = $diff;
                         $r_amt3 = 0;
                         break;
                     case 'Bank' :
                         $r_amt1 = 0;
                         $r_amt2 = 0;
-                        $r_amt3 = $p_amount;
+                        $r_amt3 = $diff;
                         break;
                 }
-                if($p_amount) $this->billing->paynow($invocieno, $p_amount, $tnote, $pmethod, $this->aauth->get_user()->loc, 0, $account);
+                $this->billing->paynow($invocieno, $diff, $tnote, $pmethod, $this->aauth->get_user()->loc, 0, $account);
                 $this->registerlog->update($this->aauth->get_user()->id, $r_amt1, $r_amt2, $r_amt3, 0, $c_amt);
                 if ($promo_flag) {
                     $cqty = $result_c['available'] - 1;
@@ -1418,11 +1547,22 @@ class Pos_invoices extends CI_Controller
                         $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_.png';
                         $static_q = $data['qrc'];
 
-                        $qrCode = new QrCode(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token));
+                        $qrCode = QrCode::create(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token))
+                            ->setEncoding(new Encoding('UTF-8'))
+                            ->setSize(300)
+                            ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin())
+                            ->setForegroundColor(new Color(0, 0, 0))
+                            ->setBackgroundColor(new Color(255, 255, 255));
+
+                        $writer = new PngWriter();
+                        $result = $writer->write($qrCode);
+                        $result->saveToFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+
+                        //$qrCode = new QrCode(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token));
 
 //header('Content-Type: '.$qrCode->getContentType());
 //echo $qrCode->writeString();
-                        $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+                       // $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
                     }
 
                     // boost the memory limit if it's low ;)
@@ -1439,7 +1579,7 @@ class Pos_invoices extends CI_Controller
                     $html = $this->load->view('pos/pdfposthermal', $data, true);
                     // render the view into HTML
 
-                    $h = 10 + $this->pheight;
+                    $h = 160 + $this->pheight;
                     $pdf->_setPageSize(array(70, $h), $pdf->DefOrientation);
                     $pdf->WriteHTML($html);
                     $file_name = preg_replace('/[^A-Za-z0-9]+/', '-', 'PosInvoice_' . $data['invoice']['name'] . '_' . $data['invoice']['tid']);
@@ -1448,35 +1588,44 @@ class Pos_invoices extends CI_Controller
 
 
                     if (!extension_loaded('imagick')) {
-                        echo 'imagick not installed';
+                        // echo 'imagick not installed';
+                        echo json_encode(array('status' => 'Error', 'message' => 'imagick not installed'));
+                        $printer->close();
+die();
                     }
-                    $im = new Imagick();
+                    try {
+                        $im = new Imagick();
+
+                        $image=FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.png';
+
+                        $im->setResolution(300, 300);
+                        $im->readimage(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.pdf');
+                        $im->setImageType(imagick::IMGTYPE_TRUECOLOR);
+                        $im->setImageFormat('png');
+                        //$im->transparentPaintImage(      'white', 0, 100, false    );
+                        $im->writeImage($image);
+                        $im->clear();
+                        $im->destroy();
+                        $printer->graphics(EscposImage::load($image));
+                        $printer->cut();
+                        if ($printer_data['val2'] == 'test') {
+                            $data = $connector->getData();
+
+                            header('Content-type: application/octet-stream');
+                            header('Content-Length: ' . strlen($data));
+
+                            $file = FCPATH . "advanced_pos_test_receipt_" . date('Y-m-d_H_i_s') . ".bin";
+                            file_put_contents($file, $data);
+                        }
+                        $printer->close();
+                        unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $static_q);
+                        unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.pdf');
+                        unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.png');
 
 
-                    $im->setResolution(300, 300);
-                    $im->readimage(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.pdf');
-                    $im->setImageType(imagick::IMGTYPE_TRUECOLOR);
-                    $im->setImageFormat('png');
-                    //$im->transparentPaintImage(      'white', 0, 100, false    );
-                    $im->writeImage(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.png');
-                    $im->clear();
-                    $im->destroy();
-                    $printer->graphics(EscposImage::load(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.png'));
-                    $printer->cut();
-                    if ($printer_data['val2'] == 'test') {
-                        $data = $connector->getData();
-
-                        header('Content-type: application/octet-stream');
-                        header('Content-Length: ' . strlen($data));
-
-                        $file = FCPATH . "advanced_pos_test_receipt_" . date('Y-m-d_H_i_s') . ".bin";
-                        file_put_contents($file, $data);
+                    } catch (ImagickException $imagick_exception) {
+echo 6;
                     }
-                    $printer->close();
-                    unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $static_q);
-                    unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.pdf');
-                    unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_name . '.png');
-
                 }
 
 
@@ -1486,11 +1635,13 @@ class Pos_invoices extends CI_Controller
                 $this->db->from('geopos_restkeys');
                 $this->db->limit(1);
                 $query_r = $this->db->get();
+
                 if ($query_r->num_rows() > 0) {
-                    $rest = $query_r['key'];
+
+                    $rest = $query_r->row_array()['key'];
                     $ch = curl_init();
                     // Set cURL options
-                    curl_setopt($ch, CURLOPT_URL, $printer_data['val3'] . "pos_printer/index.php?app_url=" . htmlentities(base_url() . '&id=' . $tid . '&rest_key=' . $rest . '&printer_connection=server'));
+                    curl_setopt($ch, CURLOPT_URL, $printer_data['val3'] . "?app_url=" . htmlentities(base_url()) . '&id=' . $tid . '&rest_key=' . $rest . '&printer_connection=server');
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                     curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.66 Safari/537.36");
                     // Decode returned JSON
@@ -1556,10 +1707,20 @@ class Pos_invoices extends CI_Controller
         if ($online_pay['enable'] == 1) {
             $token = hash_hmac('ripemd160', $tid, $this->config->item('encryption_key'));
             $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_.png';
-            $qrCode = new QrCode(base_url('billing/view?id=' . $tid . '&itype=inv&token=' . $token));
+            $qrCode = QrCode::create(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token))
+                ->setEncoding(new Encoding('UTF-8'))
+                ->setSize(300)
+                ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin())
+                ->setForegroundColor(new Color(0, 0, 0))
+                ->setBackgroundColor(new Color(255, 255, 255));
+
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+            $result->saveToFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+           // $qrCode = new QrCode(base_url('billing/view?id=' . $tid . '&itype=inv&token=' . $token));
 //header('Content-Type: '.$qrCode->getContentType());
 //echo $qrCode->writeString();
-            $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+           // $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
         }
         // boost the memory limit if it's low ;)
         ini_set('memory_limit', '64M');
@@ -1575,15 +1736,13 @@ class Pos_invoices extends CI_Controller
         //   $pdf->SetDirectionality('rtl'); // Set lang direction for rtl lang
         $pdf->autoLangToFont = true;
         $html = $this->load->view('print_files/pos_pdf_compact', $data, true);
-        //$h = 160 + $this->pheight;
-        $h = 180 + $this->pheight;
+        $h = 160 + $this->pheight;
         //  $pdf->_setPageSize(array(70, $h), $this->orientation);
-        $pdf->_setPageSize(array(80, $h), $pdf->DefOrientation);
+        $pdf->_setPageSize(array(70, $h), $pdf->DefOrientation);
         $pdf->WriteHTML($html);
         // render the view into HTML
         // write the HTML into the PDF
         $file_name = preg_replace('/[^A-Za-z0-9]+/', '-', 'PosInvoice_' . $data['invoice']['name'] . '_' . $data['invoice']['tid']);
-    
         if ($this->input->get('d')) {
             $pdf->Output($file_name . '.pdf', 'D');
         } else {
@@ -1731,7 +1890,7 @@ class Pos_invoices extends CI_Controller
         $html = $this->load->view('print_files/pos_pdf_compact', $data, true);
         // render the view into HTML
 
-        $h = 10 + $this->pheight;
+        $h = 160 + $this->pheight;
         $pdf->_setPageSize(array(70, $h), $pdf->DefOrientation);
         $pdf->WriteHTML($html);
         $file_name = substr($key, 0, 6) . $id;
@@ -1802,5 +1961,69 @@ class Pos_invoices extends CI_Controller
 
     }
 
+        public function invoice_legacy()
+    {
+
+        $id = $this->input->post('inv');
+
+        if (!$id) {
+            exit('eer');
+        }
+
+        // Get the user from the array, using the id as key for retrieval.
+        // Usually a model is to be used for this.
+
+        $file_name = rand(99,999) . $id.time();
+
+        $tid = $id;
+        $data['qrc'] = $file_name. '.png';
+        $data['id'] = $tid;
+        $data['title'] = "Invoice $tid";
+        $data['invoice'] = $this->invocies->invoice_details($tid);
+        if ($data['invoice']) $data['products'] = $this->invocies->invoice_products($tid);
+        if ($data['invoice']) $data['employee'] = $this->invocies->employee($data['invoice']['eid']);
+
+
+        $this->load->model('billing_model', 'billing');
+        $online_pay = $this->billing->online_pay_settings();
+        if ($online_pay['enable'] == 1) {
+            $token = hash_hmac('ripemd160', $tid, $this->config->item('encryption_key'));
+            $data['qrc'] = $file_name. '.png';
+
+            $qrCode = new QrCode(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token));
+
+//header('Content-Type: '.$qrCode->getContentType());
+//echo $qrCode->writeString();
+            $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+        }
+
+        $this->pheight = 0;
+        $this->load->library('pdf');
+        $pdf = $this->pdf->load_thermal();
+        // retrieve data from model or just static date
+        $data['title'] = "items";
+        $pdf->allow_charset_conversion = true;  // Set by default to TRUE
+        $pdf->charset_in = 'UTF-8';
+        //   $pdf->SetDirectionality('rtl'); // Set lang direction for rtl lang
+        $pdf->autoLangToFont = true;
+        $data['round_off'] = $this->custom->api_config(4);
+        $html = $this->load->view('print_files/pos_pdf_compact', $data, true);
+        // render the view into HTML
+
+        $h = 160 + $this->pheight;
+        $pdf->_setPageSize(array(70, $h), $pdf->DefOrientation);
+        $pdf->WriteHTML($html);
+
+        $r=$pdf->Output('userfiles/pos_temp/' . $file_name . '.pdf', 'F');
+        echo  json_encode(array('status'=>'Success','file_name'=> $file_name));
+
+    }
+    public function invoice_clean()
+    {
+        $file_id = $this->input->post('file_id', true);
+        unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_id . '.png');
+        unlink(FCPATH . 'userfiles' . DIRECTORY_SEPARATOR . 'pos_temp' . DIRECTORY_SEPARATOR . $file_id . '.pdf');
+
+    }
 
 }

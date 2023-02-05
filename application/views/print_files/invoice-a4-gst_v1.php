@@ -338,8 +338,15 @@
                 <p><?php echo '<strong>' . $this->lang->line('Status') . ': ' . $this->lang->line(ucwords($invoice['status'])) . '</strong></p>';
                     if (!$general['t_type']) {
 
-                        echo '<br><p>' . $this->lang->line('Total Amount') . ': ' . amountExchange($invoice['total'], $invoice['multi'], $invoice['loc']) . '</p><br><p>' . $this->lang->line('Paid Amount') . ': ' . amountExchange($invoice['pamnt'], $invoice['multi'], $invoice['loc']);
+                        echo '<br><p>' . $this->lang->line('Total Amount') . ': ' . amountExchange($invoice['total'], $invoice['multi'], $invoice['loc']) . '</p><br><p>' . $this->lang->line('Paid Amount') . ': ' . amountExchange($invoice['pamnt'], $invoice['multi'], $invoice['loc']) . '</p><br><p>';;
+
+                             if (@$round_off['other']) {
+                            $final_amount = round($invoice['total'], $round_off['active'], constant($round_off['other']));
+                            echo '<p>' . $this->lang->line('Round Off') . ' ' . $this->lang->line('Amount') . ': ' . amountExchange($final_amount, $invoice['multi'], $invoice['loc']) . '</p><br><p>';
+                        }
                     }
+
+
 
                     if ($general['t_type']) {
                         echo '<hr>' . $this->lang->line('Proposal') . ': </br></br><small>' . $invoice['proposal'] . '</small>';
@@ -403,6 +410,9 @@
     if ($rming < 0) {
         $rming = 0;
 
+    }
+      if (@$round_off['other']) {
+        $rming = round($rming, $round_off['active'], constant($round_off['other']));
     }
     echo amountExchange($rming, $invoice['multi'], $invoice['loc']);
     echo '</strong></td>

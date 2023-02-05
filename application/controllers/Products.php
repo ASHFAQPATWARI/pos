@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -92,7 +92,6 @@ class Products extends CI_Controller
             $row = array();
             $row[] = $no;
             $pid = $prd->pid;
-            $fk_pro_id = $prd->fk_pro_id;
             $row[] = '<a href="#" data-object-id="' . $pid . '" class="view-object"><span class="avatar-lg align-baseline"><img src="' . base_url() . 'userfiles/product/thumbnail/' . $prd->image . '" ></span>&nbsp;' . $prd->product_name . '</a>';
             $row[] = +$prd->qty;
             $row[] = $prd->product_code;
@@ -110,8 +109,7 @@ class Products extends CI_Controller
                                     <div class="dropdown-menu">
 &nbsp;<a href="' . base_url() . 'products/edit?id=' . $pid . '"  class="btn btn-purple btn-sm"><span class="fa fa-edit"></span>' . $this->lang->line('Edit') . '</a><div class="dropdown-divider"></div>&nbsp;<a href="#" data-object-id="' . $pid . '" class="btn btn-danger btn-sm  delete-object"><span class="fa fa-trash"></span>' . $this->lang->line('Delete') . '</a>
                                     </div>
-                                </div>
-                                <div>' . $fk_pro_id . '</div>';
+                                </div>';
             $data[] = $row;
         }
         $output = array(
@@ -151,10 +149,8 @@ class Products extends CI_Controller
         $sub_cat = $this->input->post('sub_cat');
         $brand = $this->input->post('brand');
         $serial = $this->input->post('product_serial');
-        $weight = $this->input->post('weight');
-        $fk_pro_id = $this->input->post('fk_pro_id_hidden');
         if ($catid) {
-            $this->products->addnew($fk_pro_id, $catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $v_type, $v_stock, $v_alert, $wdate, $code_type, $w_type, $w_stock, $w_alert, $sub_cat, $brand, $serial);
+            $this->products->addnew($catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $v_type, $v_stock, $v_alert, $wdate, $code_type, $w_type, $w_stock, $w_alert, $sub_cat, $brand, $serial);
         }
     }
 
@@ -181,6 +177,9 @@ class Products extends CI_Controller
 
     public function edit()
     {
+        if (!$this->aauth->premission(14)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+        }
         $pid = $this->input->get('id');
         $this->db->select('*');
         $this->db->from('geopos_products');
@@ -223,6 +222,9 @@ class Products extends CI_Controller
 
     public function editproduct()
     {
+        if (!$this->aauth->premission(14)) {
+            exit('<h3>Sorry! You have insufficient permissions to access this section</h3>');
+        }
         $pid = $this->input->post('pid');
         $product_name = $this->input->post('product_name', true);
         $catid = $this->input->post('product_cat');
@@ -242,7 +244,6 @@ class Products extends CI_Controller
         $sub_cat = $this->input->post('sub_cat');
         if (!$sub_cat) $sub_cat = 0;
         $brand = $this->input->post('brand');
-        $weight = $this->input->post('weight');
         $vari = array();
         $vari['v_type'] = $this->input->post('v_type');
         $vari['v_stock'] = $this->input->post('v_stock');
@@ -253,9 +254,8 @@ class Products extends CI_Controller
         $serial = array();
         $serial['new'] = $this->input->post('product_serial');
         $serial['old'] = $this->input->post('product_serial_e');
-        $fk_pro_id = $this->input->post('fk_pro_id');
         if ($pid) {
-            $this->products->edit($fk_pro_id, $pid, $catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $code_type, $sub_cat, $brand, $vari, $serial, $weight);
+            $this->products->edit($pid, $catid, $warehouse, $product_name, $product_code, $product_price, $factoryprice, $taxrate, $disrate, $product_qty, $product_qty_alert, $product_desc, $image, $unit, $barcode, $code_type, $sub_cat, $brand, $vari, $serial);
         }
     }
 
@@ -305,7 +305,17 @@ class Products extends CI_Controller
     public function sub_cat()
     {
         $wid = $this->input->get('id');
-        $result = $this->categories_model->category_list(1, $wid);
+        $string = $this->input->post('product');
+
+
+        if(isset($string['term'])) $this->db->like('title', $string['term']);
+        $this->db->from('geopos_product_cat');
+        $this->db->where('rel_id', $wid);
+        $this->db->where('c_type', 1);
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+
         echo json_encode($result);
     }
 
@@ -339,7 +349,11 @@ class Products extends CI_Controller
         } else {
             $id = $this->input->get('id');
             $this->load->library("Uploadhandler_generic", array(
-                'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/product/', 'upload_url' => base_url() . 'userfile/product/'
+                'accept_file_types' => '/\.(gif|jpe?g|png)$/i',
+				'upload_dir' => FCPATH . 'userfiles/product/',
+				'upload_url' => base_url() . 'userfile/product/',
+				'max_width'=>300,
+				'max_height'=>300
             ));
         }
     }
@@ -365,7 +379,6 @@ class Products extends CI_Controller
             $pdf = $this->pdf->load();
             $pdf->WriteHTML($html);
             $pdf->Output($data['name'] . '_barcode.pdf', 'I');
-
         }
     }
 
@@ -559,6 +572,7 @@ class Products extends CI_Controller
     public function custom_label()
     {
         if ($this->input->post()) {
+            require APPPATH . 'third_party/barcode/autoload.php';
             $width = $this->input->post('width');
             $height = $this->input->post('height');
             $padding = $this->input->post('padding');
@@ -567,6 +581,13 @@ class Products extends CI_Controller
             $product_price = $this->input->post('product_price');
             $product_code = $this->input->post('product_code');
             $bar_height = $this->input->post('bar_height');
+            $bar_width = $this->input->post('bar_width');
+            $label_width = $this->input->post('label_width');
+            $label_height = $this->input->post('label_height');
+            $product_name = $this->input->post('product_name');
+            $font_size = $this->input->post('font_size');
+            $max_char = $this->input->post('max_char');
+            $b_type = $this->input->post('b_type');
             $total_rows = $this->input->post('total_rows');
             $items_per_rows = $this->input->post('items_per_row');
             $extra = $this->input->post('extra');
@@ -616,7 +637,7 @@ class Products extends CI_Controller
         } else {
             $data['cat'] = $this->categories_model->category_list();
             $data['warehouse'] = $this->categories_model->warehouse_list();
-            $head['title'] = "Stock Transfer";
+            $head['title'] = "Custom Label";
             $head['usernm'] = $this->aauth->get_user()->username;
             $this->load->view('fixed/header', $head);
             $this->load->view('products/custom_label', $data);

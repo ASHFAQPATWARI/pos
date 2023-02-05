@@ -13,7 +13,7 @@
                 <div class="ibox-content no-padding border-left-right">
                     <img alt="profile picture" id="dpic" class="img-responsive col"
                          src="<?php echo base_url('userfiles/employee/') . $user['picture'] ?>">
-                </div>
+                </div><div id="errorImgD"></div>
                 <hr>
                 <p><label for="fileupload"><?php echo $this->lang->line('Change Your Picture') ?></label><input
                             id="fileupload" type="file"
@@ -29,7 +29,7 @@
                 <div class="ibox-content no-padding border-left-right">
                     <img alt="sign_pic" id="sign_pic" class="img-responsive"
                          src="<?php echo base_url('userfiles/employee_sign/') . $user['sign'] ?>">
-                </div>
+                </div><div id="errorImg"></div>
                 <hr>
                 <p>
                     <label for="sign_fileupload"><?php echo $this->lang->line('Change Your Signature') ?></label><input
@@ -141,6 +141,22 @@
                                        value="<?php echo $user['email'] ?>" disabled>
                             </div>
                         </div>
+                        <div class="form-group row">
+
+                            <label class="col-sm-2 col-form-label"
+                                   for="currency">Language</label>
+
+                            <div class="col-sm-6">
+                                <select name="language" class="form-control">
+
+                                    <?php
+
+                                    echo $langs;
+                                    ?>
+
+                                </select>
+                            </div>
+                        </div>
 
 
                         <div class="form-group row">
@@ -183,10 +199,17 @@
             dataType: 'json',
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
+				if(data.result.error) {
+					$('#errorImgD').html('<span class="alert alert-danger">'+data.result.error+'</span>');
+
+				} else if(data.result.url) {
+					$('#errorImgD').html('');
+					$("#dpic").attr('src', '<?php echo base_url() ?>userfiles/employee/' + data.result.name + '?' + new Date().getTime());
+				}
 
                 //$('<p/>').text(file.name).appendTo('#files');
 
-                $("#dpic").attr('src', '<?php echo base_url() ?>userfiles/employee/' + data.result + '?' + new Date().getTime());
+              //  $("#dpic").attr('src', '<?php echo base_url() ?>userfiles/employee/' + data.result + '?' + new Date().getTime());
 
 
             },
@@ -208,10 +231,13 @@
             dataType: 'json',
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
+				if(data.result.error) {
+					$('#errorImg').html('<span class="alert alert-danger">'+data.result.error+'</span>');
 
-                //$('<p/>').text(file.name).appendTo('#files');
-
-                $("#sign_pic").attr('src', '<?php echo base_url() ?>userfiles/employee_sign/' + data.result + '?' + new Date().getTime());
+				} else if(data.result.url) {
+					$('#errorImg').html('');
+					$("#sign_pic").attr('src', '<?php echo base_url() ?>userfiles/employee/' + data.result.name + '?' + new Date().getTime());
+				}
 
 
             },

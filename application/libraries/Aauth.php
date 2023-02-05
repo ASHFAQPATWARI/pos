@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -150,7 +151,7 @@ class Aauth
      * @param bool $remember
      * @return bool Indicates successful login.
      */
-    public function login($identifier, $pass, $remember = FALSE, $captcha, $totp_code = NULL)
+    public function login($identifier, $pass, $remember = false, $captcha = false, $totp_code = NULL)
     {
 
         // Remove cookies first
@@ -2501,7 +2502,7 @@ class Aauth
         return $content;
     }
 
-    public function update_user_totp_secret($user_id = FALSE, $secret)
+    public function update_user_totp_secret($user_id = FALSE, $secret = false)
     {
 
         if ($user_id == FALSE)
@@ -2583,7 +2584,7 @@ class Aauth
 
     function applog($input1, $input2='')
     {
-         $this->aauth_db->insert('geopos_log', array('note'=>$input1,'user'=>$input2));
+         $this->aauth_db->insert('geopos_log', array('note'=>$input1,'user'=>$input2,'created'=>date('Y-m-d H:i:s')));
     }
 
      public function clock()

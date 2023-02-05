@@ -240,8 +240,10 @@
                         <input type="hidden" class="ttInput" name="product_subtotal[]" id="total-' . $i . '" value="' . edit_amountExchange_s($row['subtotal'], $invoice['multi'], $this->aauth->get_user()->loc) . '">
                         <input type="hidden" class="pdIn" name="pid[]" id="pid-' . $i . '" value="' . $row['pid'] . '">
                              <input type="hidden" name="unit[]" id="unit-' . $i . '" value="' . $row['unit'] . '">
-                                   <input type="hidden" name="hsn[]" id="unit-' . $i . '" value="' . $row['code'] . '">  <input type="hidden" name="serial[]" id="serial-' . $i . '" value="' . $row['serial'] . '">
-                    </tr> <tr class="desc_p"><td colspan="8"><textarea id="dpid-' . $i . '" class="form-control" name="product_description[]" placeholder="' . $this->lang->line('Enter Product description') . '" autocomplete="off">' . $row['product_des'] . '</textarea><br></td></tr>';
+                                   <input type="hidden" name="hsn[]" id="unit-' . $i . '" value="' . $row['code'] . '">  <input type="hidden" name="serial[]" id="serial-' . $i . '" value="' . $row['serial'] . '">';
+                                   if(isset($row['alert'])) echo'<input type="hidden" id="alert-' . $i . '" value="'.$row['alert'].'"
+                                                                               name="alert[]">';
+                  echo'  </tr> <tr class="desc_p"><td colspan="8"><textarea id="dpid-' . $i . '" class="form-control" name="product_description[]" placeholder="' . $this->lang->line('Enter Product description') . '" autocomplete="off">' . $row['product_des'] . '</textarea><br></td></tr>';
                                     $i++;
                                 } ?>
                                 <tr class="last-item-row sub_c">
@@ -333,7 +335,8 @@
                                         <input type="hidden"
                                                name="after_disc" id="after_disc">
                                         ( <?= $this->config->item('currency'); ?>
-                                        <span id="disc_final"><?= amountExchange_s((($invoice['discount'] / $invoice['discount_rate']) * 100) - $invoice['total'], $invoice['multi'], $this->aauth->get_user()->loc); ?></span>
+                                        <span id="disc_final"><?php
+                                            if($invoice['discount_rate']>0.000) echo amountExchange_s((($invoice['discount'] / $invoice['discount_rate']) * 100) - $invoice['total'], $invoice['multi'], $this->aauth->get_user()->loc); ?></span>
                                         )
                                     </td>
                                 </tr>
@@ -367,6 +370,8 @@
                         <input type="hidden" value="yes" name="applyDiscount" id="discount_handle">
                         <input type="hidden" value="<?php
                         $tt = 0;
+
+                        if($invoice['shipping']==0.00) $invoice['shipping']=1;
                         if ($invoice['ship_tax_type'] == 'incl') $tt = @number_format(($invoice['shipping'] - $invoice['ship_tax']) / $invoice['shipping'], 2, '.', '');
                         echo amountFormat_general(@number_format((($invoice['ship_tax'] / $invoice['shipping']) * 100) + $tt, 3, '.', '')); ?>"
                                name="shipRate" id="ship_rate">
@@ -374,33 +379,34 @@
                                id="ship_taxtype">
                         <input type="hidden" value="<?= amountFormat_general($invoice['ship_tax']); ?>" name="ship_tax"
                                id="ship_tax">
+                        <?php
+                        if(is_array($custom_fields)){
+                            foreach ($custom_fields as $row) {
+                                if ($row['f_type'] == 'text') { ?>
+                                    <div class="form-group row">
+
+                                        <label class="col-sm-2 col-form-label"
+                                               for="docid"><?= $row['name'] ?></label>
+
+                                        <div class="col-sm-8">
+                                            <input type="text" placeholder="<?= $row['placeholder'] ?>"
+                                                   class="form-control margin-bottom b_input"
+                                                   name="custom[<?= $row['id'] ?>]"
+                                                   value="<?= @$row['data'] ?>">
+                                        </div>
+                                    </div>
+
+
+                                <?php }
+
+
+                            }
+                        }
+                        ?>
                 </form>
             </div>
 
-            <?php
-            if(is_array($custom_fields)){
-            foreach ($custom_fields as $row) {
-                            if ($row['f_type'] == 'text') { ?>
-                                <div class="form-group row">
 
-                                    <label class="col-sm-2 col-form-label"
-                                           for="docid"><?= $row['name'] ?></label>
-
-                                    <div class="col-sm-8">
-                                        <input type="text" placeholder="<?= $row['placeholder'] ?>"
-                                               class="form-control margin-bottom b_input"
-                                               name="custom[<?= $row['id'] ?>]"
-                                               value="<?= @$row['data'] ?>">
-                                    </div>
-                                </div>
-
-
-                            <?php }
-
-
-                        }
-            }
-                        ?>
         </div>
 
         <div class="modal fade" id="addCustomer" role="dialog">

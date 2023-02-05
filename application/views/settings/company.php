@@ -202,8 +202,9 @@
 
                                     <input type="hidden" name="id" value="<?php echo $company['id'] ?>">
                                     <div class="ibox-content no-padding border-left-right">
-                                        <img alt="image" id="dpic" class="col"
+                                        <img alt="image" id="dpic" class="col" style="max-width: 200px"
                                              src="<?php echo base_url('userfiles/company/') . $company['logo'] . '?t=' . rand(5, 99); ?>">
+										<div id="errorImg"></div>
                                     </div>
 
                                     <hr>
@@ -211,7 +212,7 @@
                                         <label for="fileupload"><?php echo $this->lang->line('Change Company Logo') ?></label><input
                                                 id="fileupload" type="file"
                                                 name="files[]"></p>
-                                    <pre>Recommended logo size is 500x200px.</pre>
+                                    <pre>Recommended logo size is 500x300px.</pre>
                                     <div id="progress" class="progress progress-sm mt-1 mb-0">
                                         <div class="progress-bar bg-success" role="progressbar" style="width: 0%"
                                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
@@ -244,9 +245,13 @@
             dataType: 'json',
             formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
             done: function (e, data) {
+				if(data.result.error) {
+					$('#errorImg').html('<span class="alert alert-danger">'+data.result.error+'</span>');
 
-                $("#dpic").attr('src', '<?php echo base_url() ?>userfiles/company/' + data.result + '?' + new Date().getTime());
-
+				} else if(data.result.url) {
+					$('#errorImg').html('');
+					$("#dpic").attr('src', '<?php echo base_url() ?>userfiles/company/' + data.result.name + '?' + new Date().getTime());
+				}
 
             },
             progressall: function (e, data) {

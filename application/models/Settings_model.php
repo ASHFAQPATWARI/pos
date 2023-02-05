@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -175,8 +175,10 @@ class Settings_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
         if ($this->db->update('geopos_system')) {
-            unlink(FCPATH . 'userfiles/company/' . $result['logo']);
-            unlink(FCPATH . 'userfiles/company/thumbnail/' . $result['logo']);
+        	if(file_exists(FCPATH . 'userfiles/company/' . $result['logo'])) {
+				unlink(FCPATH . 'userfiles/company/' . $result['logo']);
+				unlink(FCPATH . 'userfiles/company/thumbnail/' . $result['logo']);
+			}
         }
     }
 

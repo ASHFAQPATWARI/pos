@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Software
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -16,7 +16,7 @@
  * ***********************************************************************
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Quote extends CI_Controller
 {
@@ -40,7 +40,7 @@ class Quote extends CI_Controller
         $this->load->view('includes/footer');
     }
 
-    
+
     public function ajax_list()
     {
 
@@ -81,7 +81,7 @@ class Quote extends CI_Controller
         $data['id'] = $tid;
         $head['title'] = "Quote $tid";
         $data['invoice'] = $this->quote->quote_details($tid);
-        if($data['invoice']['csd']==$this->session->userdata('user_details')[0]->cid) {
+        if ($data['invoice']['csd'] == $this->session->userdata('user_details')[0]->cid) {
             $data['products'] = $this->quote->quote_products($tid);
 
 
@@ -94,32 +94,27 @@ class Quote extends CI_Controller
 
     }
 
-     public function approve()
+    public function approve()
     {
         $tid = $this->input->get('id');
         $data['id'] = $tid;
         $head['title'] = "Quote $tid";
         $data['invoice'] = $this->quote->quote_details($tid);
-        if($data['invoice']['csd']==$this->session->userdata('user_details')[0]->cid) {
-             $this->quote->update_status($tid);
+        if ($data['invoice']['csd'] == $this->session->userdata('user_details')[0]->cid) {
+            $this->quote->update_status($tid);
             $data['products'] = $this->quote->quote_products($tid);
 
 
             $data['employee'] = $this->quote->employee($data['invoice']['eid']);
+            $m=array('message'=>'Approved!');
+            $this->session->set_flashdata('item',$m);
+            $this->session->keep_flashdata('item',$m);
+            redirect(base_url('quote/view?id=' . $tid));
 
-            $this->load->view('includes/header', $head);
-            $this->load->view('quotes/view', $data);
-            $this->load->view('includes/footer');
+
         }
 
     }
-
-
-
-
-
-
-
 
 
 }

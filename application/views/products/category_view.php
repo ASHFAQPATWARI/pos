@@ -129,13 +129,11 @@
 
                 //datatables
                 table = $('#productstable').DataTable({
-                    
 
                     "processing": true, //Feature control the processing indicator.
                     "serverSide": true, //Feature control DataTables' server-side processing mode.
                     "order": [], //Initial no order.
                     responsive: true,
-                    "lengthMenu": [[100, 25, 50, -1], [100, 25, 50, "All"]],
                     <?php datatable_lang();?>
 
                     // Load data for the table's content from an Ajax source
