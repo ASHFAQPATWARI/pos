@@ -23,10 +23,11 @@ $('#addproduct').on('click', function () {
                 data: 'name_startsWith=' + request.term + '&type=product_list&row_num=' + row + '&wid=' + $("#s_warehouses option:selected").val() + '&' + d_csrf,
                 success: function (data) {
                     response($.map(data, function (item) {
-                        var product_d = item[0];
+                        var product_name = item[0];
+                        var product_label = item[7];
                         return {
-                            label: product_d,
-                            value: product_d,
+                            label: product_label + ' | ' + product_name,
+                            value: product_label + ' | ' + product_name,
                             data: item
                         };
                     }));
@@ -710,10 +711,11 @@ $('#productname-0').autocomplete({
             data: 'name_startsWith=' + request.term + '&type=product_list&row_num=1&wid=' + $("#s_warehouses option:selected").val() + '&' + d_csrf,
             success: function (data) {
                 response($.map(data, function (item) {
-                    var product_d = item[0];
+                    var product_name = item[0];
+                    var product_label = item[7];
                     return {
-                        label: product_d,
-                        value: product_d,
+                        label: product_label + ' | ' + product_name,
+                        value: product_label + ' | ' + product_name,
                         data: item
                     };
                 }));

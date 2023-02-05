@@ -21,10 +21,10 @@
                     <td><?= $general['title'] . ' ' . $this->lang->line('Date') ?></td>
                     <td><?php echo dateformat($invoice['invoicedate']) ?></td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td><?php echo $this->lang->line('Due Date') ?></td>
                     <td><?php echo dateformat($invoice['invoiceduedate']) ?></td>
-                </tr>
+                </tr> -->
                 <?php if ($invoice['refer']) { ?>
                     <tr>
                         <td><?php echo $this->lang->line('Reference') ?></td>
@@ -37,4 +37,4 @@
         </td>
     </tr>
 </table>
-<br>
+<!-- <br> -->
