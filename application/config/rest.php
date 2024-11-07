@@ -533,7 +533,7 @@ $config['rest_language'] = 'english';
 | will access it through a browser
 |
 */
-$config['check_cors'] = FALSE;
+$config['check_cors'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -545,6 +545,7 @@ $config['check_cors'] = FALSE;
 */
 $config['allowed_cors_headers'] =array(    'Origin',
     'X-Requested-With',
+    'X-API-KEY',
     'Content-Type',
     'Accept',
     'Access-Control-Request-Method'
@@ -576,7 +577,7 @@ $config['allowed_cors_methods'] = array(
 | source domain
 |
 */
-$config['allow_any_cors_domain'] = FALSE;
+$config['allow_any_cors_domain'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------

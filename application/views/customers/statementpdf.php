@@ -186,8 +186,11 @@
             </td>
 
             <td>
-                <?php echo $customer['name'] . '</strong><br>' . $customer['address'] . '<br>' . $customer['city'] . '<br>Phone: ' . $customer['phone'] . '<br>Email: ' . $customer['email']; ?>
+                <strong><?php echo $customer['name'] . '</strong><br>' . $customer['address'] . '<br>' . $customer['city'] . '<br>Phone: ' . $customer['phone']; ?>
             </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: center; vertical-align: middle;"><strong><?php echo $startdate ?> - <?php echo $enddate ?></strong></td>
         </tr>
         </tbody>
     </table>

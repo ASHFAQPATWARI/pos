@@ -135,8 +135,8 @@
                                        for="sdate"><?php echo $this->lang->line('From Date') ?></label>
 
                                 <div class="col-sm-4">
-                                    <input type="text" class="form-control required"
-                                           placeholder="Start Date" name="sdate" id="sdate"
+                                    <input type="text" class="form-control required sameday"
+                                           placeholder="Start Date" name="sdate"
                                            data-toggle="datepicker" autocomplete="false">
                                 </div>
                             </div>

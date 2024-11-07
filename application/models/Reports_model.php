@@ -404,6 +404,68 @@ class Reports_model extends CI_Model
         return $result;
     }
 
+    // Products sold by salesman grouped by product ID
+    public function productsSoldBySalesmanGrouped($salesman_id, $sdate, $edate)
+    {
+        $query = $this->db->query("SELECT geopos_invoice_items.pid, geopos_products.product_code, geopos_products.product_name, SUM(geopos_invoice_items.qty) as count, SUM(geopos_invoice_items.subtotal) as amount FROM `geopos_invoices` 
+        INNER JOIN geopos_invoice_items ON geopos_invoices.id=geopos_invoice_items.tid
+        INNER JOIN geopos_products ON geopos_products.pid=geopos_invoice_items.pid
+        INNER JOIN geopos_delivery_boy_to_invoice ON geopos_invoices.id=geopos_delivery_boy_to_invoice.invoice_id
+        WHERE geopos_invoices.invoicedate BETWEEN DATE('$sdate') AND DATE('$edate')
+        AND  geopos_invoices.status != 'canceled'
+        AND geopos_delivery_boy_to_invoice.boy_id='$salesman_id'
+        GROUP BY geopos_invoice_items.pid,geopos_products.product_name;");
+        $result = $query->result_array();
+        return $result;
+    }
+
+    // Products sold by salesman
+    public function productsSoldBySalesman($salesman_id, $sdate, $edate)
+    {
+        $query = $this->db->query("SELECT geopos_invoice_items.pid, geopos_products.product_code, geopos_products.product_name, geopos_invoice_items.price, geopos_invoice_items.qty as count, geopos_invoice_items.subtotal as amount FROM `geopos_invoices` 
+        INNER JOIN geopos_invoice_items ON geopos_invoices.id=geopos_invoice_items.tid
+        INNER JOIN geopos_products ON geopos_products.pid=geopos_invoice_items.pid
+        INNER JOIN geopos_delivery_boy_to_invoice ON geopos_invoices.id=geopos_delivery_boy_to_invoice.invoice_id
+        WHERE geopos_invoices.invoicedate BETWEEN DATE('$sdate') AND DATE('$edate')
+        AND  geopos_invoices.status != 'canceled'
+        AND geopos_delivery_boy_to_invoice.boy_id='$salesman_id'");
+        $result = $query->result_array();
+        return $result;
+    }
+
+    // Profit of invoices of salesman
+    public function profitBySalesman($salesman_id, $sdate, $edate)
+    {
+        $query = $this->db->query("SELECT geopos_invoices.total, geopos_metadata.rid, geopos_metadata.col1 FROM `geopos_invoices` 
+        INNER JOIN geopos_metadata ON geopos_invoices.id=geopos_metadata.rid 
+        INNER JOIN geopos_delivery_boy_to_invoice ON geopos_invoices.id=geopos_delivery_boy_to_invoice.invoice_id 
+        WHERE geopos_invoices.invoicedate BETWEEN DATE('$sdate') AND DATE('$edate')
+        AND geopos_delivery_boy_to_invoice.boy_id='$salesman_id'");
+        $result = $query->result_array();
+        return $result;
+    }
+
+    // Total Due of invoices of salesman
+    public function totalDueBySalesman($salesman_id, $isTotal, $sdate, $edate)
+    {
+        $this->db->select('geopos_invoices.id,geopos_invoices.tid, geopos_invoices.invoicedate, geopos_invoices.status,geopos_invoices.total,geopos_invoices.pamnt,geopos_customers.name');
+        $this->db->from('geopos_invoices');
+        $this->db->join('geopos_customers', 'geopos_invoices.csd=geopos_customers.id', 'left');
+        $this->db->join('geopos_delivery_boy_to_invoice', 'geopos_invoices.id=geopos_delivery_boy_to_invoice.invoice_id', 'inner');
+        $status_string = array('partial', 'due');
+        $this->db->where_in('geopos_invoices.status', $status_string);
+        if ($isTotal == 'no') {
+            $this->db->where('DATE(invoicedate) >=', $sdate);
+            $this->db->where('DATE(invoicedate) <=', $edate);
+        }
+        $this->db->where('geopos_delivery_boy_to_invoice.boy_id =', $salesman_id);
+        
+
+        $query = $this->db->get();
+        $result = $query->result_array();
+        return $result;
+    }
+
     //products statement
 
 

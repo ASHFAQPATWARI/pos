@@ -23,7 +23,7 @@ class Pos_invoices_model extends CI_Model
     var $table = 'geopos_invoices';
     var $column_order = array(null, 'geopos_invoices.tid', 'geopos_customers.name', 'geopos_invoices.invoicedate', 'geopos_invoices.total', 'geopos_invoices.status', null);
     var $column_search = array('geopos_invoices.tid', 'geopos_customers.name', 'geopos_invoices.invoicedate', 'geopos_invoices.total','geopos_invoices.status');
-    var $order = array('geopos_invoices.tid' => 'desc');
+    var $order = array('geopos_invoices.id' => 'desc');
 
     public function __construct()
     {
@@ -212,7 +212,7 @@ class Pos_invoices_model extends CI_Model
 
     private function _get_datatables_query($opt = '')
     {
-        $this->db->select('geopos_invoices.id,geopos_invoices.tid,geopos_invoices.invoicedate,geopos_invoices.invoicedatetime,geopos_invoices.invoiceduedate,geopos_invoices.total,geopos_invoices.status,geopos_customers.name,geopos_delivery_boys.boy_id');
+        $this->db->select('geopos_invoices.id,geopos_invoices.tid,geopos_invoices.invoicedate,geopos_invoices.invoicedatetime,geopos_invoices.invoiceduedate,geopos_invoices.total,geopos_invoices.status,geopos_customers.name,geopos_customers.id as custid,geopos_delivery_boy_to_invoice.boy_id,geopos_metadata.col1');
         $this->db->from($this->table);
         $this->db->where('geopos_invoices.i_class', 1);
         if ($opt) {
@@ -228,8 +228,9 @@ class Pos_invoices_model extends CI_Model
         }
           elseif(!BDATA) { $this->db->where('geopos_invoices.loc', 0); }
         $this->db->join('geopos_customers', 'geopos_invoices.csd=geopos_customers.id', 'left');
+        $this->db->join('geopos_metadata', 'geopos_invoices.id=geopos_metadata.rid', 'left');
         $this->db->join('geopos_delivery_boy_to_invoice', 'geopos_invoices.id=geopos_delivery_boy_to_invoice.invoice_id', 'left');
-        $this->db->join('geopos_delivery_boys', 'geopos_delivery_boy_to_invoice.boy_id=geopos_delivery_boys.boy_id', 'left');
+        // $this->db->join('geopos_delivery_boys', 'geopos_delivery_boy_to_invoice.boy_id=geopos_delivery_boys.boy_id', 'left');
 
         $i = 0;
 

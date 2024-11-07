@@ -386,7 +386,7 @@
 
                         <div class="col-sm-10">
                             <input type="text" placeholder="Name"
-                                   class="form-control margin-bottom" id="mcustomer_name" name="name" required>
+                                   class="form-control margin-bottom crequired" id="mcustomer_name" name="name" required>
                         </div>
                     </div>
 
@@ -406,7 +406,7 @@
 
                         <div class="col-sm-10">
                             <input type="email" placeholder="Email"
-                                   class="form-control margin-bottom crequired" name="email" id="mcustomer_email">
+                                   class="form-control margin-bottom" name="email" id="mcustomer_email">
                         </div>
                     </div>
                     <div class="form-group row">

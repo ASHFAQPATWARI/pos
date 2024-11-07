@@ -108,7 +108,7 @@
                                                                                      aria-hidden="true"></span></div>
                                                 <input type="text" class="form-control round" placeholder="Invoice #"
                                                        name="invocieno"
-                                                       value="<?php echo $invoice['tid']; ?>" readonly> <input
+                                                       value="<?php echo $invoice['tid']; ?>" > <input
                                                         type="hidden"
                                                         name="iid"
                                                         value="<?php echo $invoice['iid']; ?>">

@@ -276,7 +276,7 @@
                             <th><?php echo $this->lang->line('Customer') ?></th>
                             <th>Invoice Date time</th>
                             <th><?php echo $this->lang->line('Status') ?></th>
-                            <th><?php echo $this->lang->line('Due') ?></th>
+                            <!-- <th><?php echo $this->lang->line('Due') ?></th> -->
                             <th><?php echo $this->lang->line('Amount') ?></th>
                         </tr>
                         </thead>
@@ -299,7 +299,7 @@
                                 <td class="text-truncate"><a href="' . base_url() . $page . '/view?id=' . $item['id'] . '">' . $t . '#' . $item['tid'] . '</a></td>
                                 <td class="text-truncate"> ' . $item['name'] . '</td>
                                 <td class="text-truncate"> ' . $formattedDate . '</td>
-                                <td class="text-truncate"><span class="badge  st-' . $item['status'] . ' st-' . $item['status'] . '">' . $this->lang->line(ucwords($item['status'])) . '</span></td><td class="text-truncate">' . dateformat($item['invoicedate']) . '</td>
+                                <td class="text-truncate"><span class="badge  st-' . $item['status'] . ' st-' . $item['status'] . '">' . $this->lang->line(ucwords($item['status'])) . '</span></td>
                                 <td class="text-truncate">' . amountExchange($item['total'], 0, $this->aauth->get_user()->loc) . '</td>
                             </tr>';
                         }

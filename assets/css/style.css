@@ -640,3 +640,7 @@ ballsWaveG {
 .select2 {
   min-width: 14rem;
 }
+
+.high-z-index {
+  z-index: 99 !important;
+}

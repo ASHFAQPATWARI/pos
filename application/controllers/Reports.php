@@ -542,6 +542,22 @@ class Reports extends CI_Controller
 
     }
 
+    public function salesmanstatement()
+
+    {
+        $head['title'] = "Salesman Statement";
+        $head['usernm'] = $this->aauth->get_user()->username;
+        $this->load->view('fixed/header', $head);
+        $this->load->model('delivery_model');
+        $data['deliveryBoys'] = $this->delivery_model->getAllDeliveryBoys();
+
+        $this->load->view('reports/salesman_statement', $data);
+
+
+        $this->load->view('fixed/footer');
+
+    }
+
 
     public function customsales()
     {
@@ -605,6 +621,147 @@ class Reports extends CI_Controller
                     $html .= '<tr><td>' . $prd['pid'] . '</td><td>' . $prd['product_name'] . '</td><td>' . $prd['weight'] . '</td><td>' . $prd['qtys'] . '</td><td>' . $totalWeight . '</td><td>' . $prd['subtotal'] . '</td></tr>';
                 }
                 $html .= '</tbody><tfoot><tr><td></td><td></td><th scope="row">Total</th><th scope="row">'. $totalQtys .'</th><th scope="row">' . $totalWeights . '</th><th scope="row">'. $SubTotalsAmount .'</th></tr></tfoot></table>';
+                echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' =>  $html));
+            } else {
+                echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days', 'param1' => 'Date range should be within 365 day'));
+            }
+        }
+    }
+
+    // Calculate products qty and subtotal by salesman
+    public function salesStatementCalcGrouped()
+    {
+
+        if ($this->input->post('check')) {
+            $salesman_id = $this->input->post('pay_acc');
+            $sdate = datefordatabase($this->input->post('sdate'));
+            $edate = datefordatabase($this->input->post('edate'));
+
+            $date1 = new DateTime($sdate);
+            $date2 = new DateTime($edate);
+
+            $diff = $date2->diff($date1)->format("%a");
+            if ($diff < 365) {
+                $products = $this->reports->productsSoldBySalesmanGrouped($salesman_id, $sdate, $edate);
+                if(count($products) == 0){
+                    echo json_encode(array('status' => 'Error', 'message' => 'no records', 'param1' => '<h4>No records</h4>'));
+                    return;
+                }
+                $html = '<table class="table"><thead><tr><th scope="col">Product Id</th><th scope="col">Product Code</th><th scope="col">Product Name</th><th scope="col">Qty</th><th scope="col">Amount</th></tr></thead><tbody>';
+                $totalQtys = 0;
+                $SubTotalsAmount = 0;
+                foreach ($products as $prd) {
+                    $totalQtys += (double)$prd['count'];
+                    $SubTotalsAmount += (double)$prd['amount'];
+                    $html .= '<tr><td>' . $prd['pid'] . '</td><td>' . $prd['product_code'] . '</td><td>' . $prd['product_name'] . '</td><td>' . $prd['count'] . '</td><td>' . $prd['amount'] . '</td></tr>';
+                }
+                $html .= '</tbody><tfoot><tr><td></td><td></td><th scope="row">Total</th><th scope="row">'. $totalQtys . '</th><th scope="row">' . $SubTotalsAmount . '</tr></tfoot></table>';
+                echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' =>  $html));
+            } else {
+                echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days', 'param1' => 'Date range should be within 365 day'));
+            }
+        }
+    }
+
+    // Calculate products qty and subtotal by salesman and products grouped by id
+    public function salesStatementCalc()
+    {
+
+        if ($this->input->post('check')) {
+            $salesman_id = $this->input->post('pay_acc');
+            $sdate = datefordatabase($this->input->post('sdate'));
+            $edate = datefordatabase($this->input->post('edate'));
+
+            $date1 = new DateTime($sdate);
+            $date2 = new DateTime($edate);
+
+            $diff = $date2->diff($date1)->format("%a");
+            if ($diff < 365) {
+                $products = $this->reports->productsSoldBySalesman($salesman_id, $sdate, $edate);
+                if(count($products) == 0){
+                    echo json_encode(array('status' => 'Error', 'message' => 'no records', 'param1' => '<h4>No records</h4>'));
+                    return;
+                }
+                $html = '<table class="table"><thead><tr><th scope="col">Product Id</th><th scope="col">Product Code</th><th scope="col">Product Name</th><th scope="col">Price</th><th scope="col">Qty</th><th scope="col">Amount</th></tr></thead><tbody>';
+                $totalQtys = 0;
+                $SubTotalsAmount = 0;
+                foreach ($products as $prd) {
+                    $totalQtys += (double)$prd['count'];
+                    $SubTotalsAmount += (double)$prd['amount'];
+                    $html .= '<tr><td>' . $prd['pid'] . '</td><td>' . $prd['product_code'] . '</td><td>' . $prd['product_name'] . '</td><td>' . $prd['price'] . '</td><td>' . $prd['count'] . '</td><td>' . $prd['amount'] . '</td></tr>';
+                }
+                $html .= '</tbody><tfoot><tr><td></td><td></td><td></td><th scope="row">Total</th><th scope="row">'. $totalQtys . '</th><th scope="row">' . amountExchange($SubTotalsAmount, 0, $this->aauth->get_user()->loc) . '</tr></tfoot></table>';
+                echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' =>  $html));
+            } else {
+                echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days', 'param1' => 'Date range should be within 365 day'));
+            }
+        }
+    }
+
+    // Calculate profit of invoices by salesman
+    public function profitBySalesmanCalc()
+    {
+
+        if ($this->input->post('check')) {
+            $salesman_id = $this->input->post('pay_acc');
+            $sdate = datefordatabase($this->input->post('sdate'));
+            $edate = datefordatabase($this->input->post('edate'));
+
+            $date1 = new DateTime($sdate);
+            $date2 = new DateTime($edate);
+
+            $diff = $date2->diff($date1)->format("%a");
+            if ($diff < 365) {
+                $assignedInvoices = $this->reports->profitBySalesman($salesman_id, $sdate, $edate);
+                if(count($assignedInvoices) == 0){
+                    echo json_encode(array('status' => 'Error', 'message' => 'no records', 'param1' => '<h4>No records</h4>'));
+                    return;
+                }
+                $html = '<table class="table"><thead><tr><th scope="col">Invoice Id</th><th scope="col">Invoice Total</th><th scope="col">Invoice Profit</th></tr></thead><tbody>';
+                $totalProfit = 0;
+                $SubTotalsAmount = 0;
+                foreach ($assignedInvoices as $prd) {
+                    $totalProfit += (double)$prd['col1'];
+                    $SubTotalsAmount += (double)$prd['total'];
+                    $html .= '<tr><td><a target="_blank" href="' . base_url() . "pos_invoices/view?id=" . $prd['rid'] . '">&nbsp; ' . $prd['rid'] . '</a></td><td>' . $prd['total'] . '</td><td>' . $prd['col1'] . '</td></tr>';
+                }
+                $html .= '</tbody><tfoot><tr><th scope="row">Total</th><th scope="row">'. amountExchange($SubTotalsAmount, 0, $this->aauth->get_user()->loc) . '</th><th scope="row">' . amountExchange($totalProfit, 0, $this->aauth->get_user()->loc) . ' (' . number_format(($totalProfit/$SubTotalsAmount)*100, 2) . '% )</tr></tfoot></table>';
+                echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' =>  $html));
+            } else {
+                echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days', 'param1' => 'Date range should be within 365 day'));
+            }
+        }
+    }
+
+    // Added By Ashfaq Patwari for calculating due amount by salesman
+    public function totalDueBySalesmanCalc()
+    {
+
+        if ($this->input->post('check')) {
+            $salesman_id = $this->input->post('pay_acc');
+            $totalDue = $this->input->post('totalDue');
+            $sdate = datefordatabase($this->input->post('sdate'));
+            $edate = datefordatabase($this->input->post('edate'));
+
+            $date1 = new DateTime($sdate);
+            $date2 = new DateTime($edate);
+
+            $diff = $date2->diff($date1)->format("%a");
+            if ($diff < 365) {
+                $dueInvoices = $this->reports->totalDueBySalesman($salesman_id, $totalDue, $sdate, $edate);
+                if(count($dueInvoices) == 0){
+                    echo json_encode(array('status' => 'Error', 'message' => 'no records', 'param1' => '<h4>No records</h4>'));
+                    return;
+                }
+                $html = '<table class="table"><thead><tr><th scope="col">Invoice Id</th><th scope="col">Invoice Date</th><th scope="col">Customer</th><th scope="col">Invoice Total</th><th scope="col">Invoice Paid amount</th><th scope="col">Invoice Due amount</th></tr></thead><tbody>';
+                $totaldue = 0;
+                $dueAmount = 0;
+                foreach ($dueInvoices as $invoice) {
+                    $dueAmount = (double)$invoice['total'] - (double)$invoice['pamnt'];
+                    $totaldue += $dueAmount;
+                    $html .= '<tr><td><a target="_blank" href="' . base_url() . "pos_invoices/view?id=" . $invoice['id'] . '">&nbsp; ' . $invoice['tid'] . '</a></td><td>' . $invoice['invoicedate'] . '</td><td>' . $invoice['name'] . '</td><td>' . $invoice['total'] . '</td><td>' . $invoice['pamnt'] . '</td><td>' . amountExchange($dueAmount, 0, $this->aauth->get_user()->loc) . '</td></tr>';
+                }
+                $html .= '</tbody><tfoot><tr><th scope="row">Total Due</th><th scope="row">'. amountExchange($totaldue, 0, $this->aauth->get_user()->loc) . '</th><th scope="row">(' . count($dueInvoices) . ')</tr></tfoot></table>';
                 echo json_encode(array('status' => 'Success', 'message' => 'Calculated', 'param1' =>  $html));
             } else {
                 echo json_encode(array('status' => 'Error', 'message' => 'Date range should be within 365 days', 'param1' => 'Date range should be within 365 day'));

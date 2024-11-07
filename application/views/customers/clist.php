@@ -46,7 +46,36 @@ if ($this->input->get('due')) {
                 <div class="message"></div>
             </div>
             <div class="card-body">
-
+                <div class="card card-block">
+                    <div class="row">
+                        <div class="col-xl-3 col-lg-6 col-12">
+                            <div class="card-content">
+                                <div class="media align-items-stretch">
+                                    <div class="p-2 text-center bg-primary bg-darken-2">
+                                        <i class="fa fa-file-text-o text-bold-200  font-large-2 white"></i>
+                                    </div>
+                                    <div class="p-1 bg-gradient-x-primary white media-body">
+                                        <h5><?php echo $this->lang->line('Due Clients') ?></h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-plus"></i><span class='dueClients'></span></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-12">
+                            <div class="card-content">
+                                <div class="media align-items-stretch">
+                                    <div class="p-2 text-center bg-danger bg-darken-2">
+                                        <i class="fa fa-file-text-o text-bold-200  font-large-2 white"></i>
+                                    </div>
+                                    <div class="p-1 bg-gradient-x-danger white media-body">
+                                        <h5><?php echo $this->lang->line('Total Due Amount') ?></h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-plus"></i><span class='totalDue'></span></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <table id="clientstable" class="table table-striped table-bordered zero-configuration" cellspacing="0"
                        width="100%">
                     <thead>
@@ -197,6 +226,18 @@ if ($this->input->get('due')) {
 
     <script type="text/javascript">
     $(document).ready(function () {
+        // Added by ashfaq to fetch total due amount
+        var actionurl = baseurl + 'customers/getTotalDue';
+        $.ajax({
+            url: actionurl,
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                $('.dueClients').html(data.totalPending);
+                $('.totalDue').html(data.due);
+            },
+        });
+
         $('.summernote').summernote({
             height: 100,
             toolbar: [

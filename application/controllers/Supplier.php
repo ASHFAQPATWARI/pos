@@ -63,6 +63,7 @@ class Supplier extends CI_Controller
         $data['details'] = $this->supplier->details($custid);
         $data['customergroup'] = $this->supplier->group_info($data['details']['gid']);
         $data['money'] = $this->supplier->money_details($custid);
+        $data['due'] = $this->supplier->due_details($custid);
         $head['usernm'] = $this->aauth->get_user()->username;
         $head['title'] = 'View Supplier';
         $this->load->view('fixed/header', $head);
@@ -81,6 +82,7 @@ class Supplier extends CI_Controller
             $row = array();
             $row[] = $no;
             $row[] = '<a href="supplier/view?id=' . $customers->id . '">' . $customers->name . '</a>';
+            $row[] = amountExchange($customers->total - $customers->pamnt, 0, $this->aauth->get_user()->loc);
             $row[] = $customers->address . ',' . $customers->city . ',' . $customers->country;
             $row[] = $customers->email;
             $row[] = $customers->phone;
@@ -319,6 +321,19 @@ class Supplier extends CI_Controller
 
         $due = 0;
         echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Paid') . ' ' . amountExchange($amount), 'due' => amountExchange_s($due)));
+    }
+
+    public function getTotalDue() {
+        $data = $this->supplier->count_allDue();
+        $totalDue = 0;
+        foreach ($data as $row) {
+            $totalDue += $row['total'] - $row['pamnt'];
+        }
+        $output = array(
+            "due" =>  amountExchange($totalDue),
+            "totalPending" => count($data)
+        );
+        echo json_encode($output);
     }
 
 

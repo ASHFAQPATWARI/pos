@@ -20,8 +20,8 @@
                 <div id="customer" class="col-md-12 ml-3">
                     <div class="clientinfo">
                         <input type="hidden" name="customer_id" id="customer_id" value="1">
-                        <div id="customer_name"><?php echo $this->lang->line('Default'); ?>: <strong>Walk
-                                In </strong></div>
+                        <div id="customer_name"><?php echo $this->lang->line('Default'); ?>: <strong>Cash Customer
+                                </strong></div>
                     </div>
                 </div>
             </div>
@@ -98,7 +98,17 @@
                             <span id="ship_final">0</span> )
                         </div>
                     </div>
-
+                    <!-- Added by Ashfaq for showing invoice no -->
+                    <div class="row mt-1">
+                        <div class="col-3">
+                            <strong><?php echo $this->lang->line('Invoice Number') ?></strong></div>
+                        <div class="col-6">
+                        <input type="text" class="form-control" placeholder="Invoice #"
+                                           name="invocieno" id="invocieno"
+                                           value="<?php echo $lastinvoice + 1 ?>">
+                        </div>
+                    </div>
+    
                 </div>
                 <div class="row mt-1">
                     <div class="col-3"><strong><?php echo $this->lang->line('Grand Total') ?>
@@ -246,18 +256,7 @@
                     </div>
                     <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                         <div class="form-group row">
-                            <div class="col-sm-3"><label for="invocieno"
-                                                         class="caption"><?php echo $this->lang->line('Invoice Number') ?></label>
 
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-file-text-o"
-                                                                         aria-hidden="true"></span>
-                                    </div>
-                                    <input type="text" class="form-control" placeholder="Invoice #"
-                                           name="invocieno" id="invocieno"
-                                           value="<?php echo $lastinvoice + 1 ?>">
-                                </div>
-                            </div>
                             <div class="col-sm-3"><label for="invocieno"
                                                          class="caption"><?php echo $this->lang->line('Reference') ?></label>
 

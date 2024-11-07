@@ -583,7 +583,7 @@
 
 <!-- ////////////////////////////////////////////////////////////////////////////-->
 <!-- Horizontal navigation-->
-<div class="header-navbar navbar-expand-sm navbar navbar-horizontal navbar-fixed navbar-light navbar-without-dd-arrow navbar-shadow menu-border"
+<div class="high-z-index header-navbar navbar-expand-sm navbar navbar-horizontal navbar-fixed navbar-light navbar-without-dd-arrow navbar-shadow menu-border"
      role="navigation" data-menu="menu-wrapper">
     <!-- Horizontal menu content-->
     <div class="navbar-container main-menu-content" data-menu="menu-container">
@@ -1036,6 +1036,9 @@
                                 <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>reports/weight"
                                                     data-toggle="dropdown">Weight</a>
                                 </li>
+                                <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>reports/salesmanstatement"
+                                                    data-toggle="dropdown">Salesman Statement</a>
+                                </li>
                                 <li data-menu=""><a class="dropdown-item"
                                                     href="<?php echo base_url(); ?>reports/products"
                                                     data-toggle="dropdown"><?php echo $this->lang->line('Products') ?></a>
@@ -1191,7 +1194,7 @@
 </div>
 <!-- Horizontal navigation-->
 <div id="c_body"></div>
-<div class="app-content content">
+<div class="app-content content z-index-down">
     <div class="content-wrapper">
         <div class="content-header row">
         </div>

@@ -180,6 +180,40 @@
 
     <body dir="<?= LTR ?>">
     <div class="invoice-box">
+        
+        <!-- Added by ashfaq to handle showing invoice details because of a4  paper printed logo -->
+        <!-- Remove this table and enable commented code in  invoice-header_v1 -->
+        <table>
+            <tr>
+                
+                <td class="myw">
+                    <table class="top_sum">
+                        <tr>
+                            <td>
+                                <?= $general['title'] ?>:
+                                <?= $general['prefix'] . ' ' . $invoice['tid'] ?>
+                            </td>
+                            <td>
+                                <?= $this->lang->line('Date') ?>:
+                                <?php echo dateformat($invoice['invoicedate']) ?>
+                            </td>
+                        </tr>
+                        
+                        <?php if ($invoice['refer']) { ?>
+                            <tr>
+                                <td>
+                                    <?php echo $this->lang->line('Reference') ?>:
+                                    <?php echo $invoice['refer'] ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </table>
+        
+        
+                </td>
+            </tr>
+        </table>
+
         <!-- <br> -->
         <table class="party">
             <thead>

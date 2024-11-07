@@ -112,7 +112,21 @@
                             )
                         </div>
                     </div>
-                    <div class="row">
+
+                    <div class="row mt-1">
+
+
+                        <div class="col-3">
+                            <strong><?php echo $this->lang->line('Invoice Number') ?></strong></div>
+                        <div class="col-6"><input type="text" class="form-control" placeholder="Invoice #"
+                                       name="invocieno" id="invocieno"
+                                       value="<?php echo $invoice['tid']; ?>">
+                                <input type="hidden" name="iid"
+                                       value="<?php echo $invoice['iid']; ?>">
+                        </div>
+                    </div>
+
+                    <div class="row mt-1">
                         <div class="col-3"><strong><?php echo $this->lang->line('Grand Total') ?>
                                 (<span
                                         class="currenty lightMode"><?php echo $this->config->item('currency'); ?></span>)</strong>
@@ -197,7 +211,7 @@
 
                 <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                     <div class="form-group row">
-                        <div class="col-sm-3"><label for="invocieno"
+                        <!-- <div class="col-sm-3"><label for="invocieno"
                                                      class="caption"><?php echo $this->lang->line('Invoice Number') ?></label>
 
                             <div class="input-group">
@@ -206,11 +220,11 @@
                                 </div>
                                 <input type="text" class="form-control" placeholder="Invoice #"
                                        name="invocieno" id="invocieno"
-                                       value="<?php echo $invoice['tid']; ?>" readonly>
+                                       value="<?php echo $invoice['tid']; ?>">
                                 <input type="hidden" name="iid"
                                        value="<?php echo $invoice['iid']; ?>">
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-sm-3"><label for="invocieno"
                                                      class="caption"><?php echo $this->lang->line('Reference') ?></label>
 

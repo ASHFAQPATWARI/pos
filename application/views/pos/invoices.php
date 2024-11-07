@@ -48,7 +48,8 @@
                         <th><?php echo $this->lang->line('Date') ?></th>
                         <th>Date Time</th>
                         <th><?php echo $this->lang->line('Amount') ?></th>
-                        <th>Delivery Boy</th>
+                        <th><?php echo $this->lang->line('Profit') ?></th>
+                        <th>Salesman</th>
                         <th><?php echo $this->lang->line('Status') ?></th>
                         <th class="no-sort"><?php echo $this->lang->line('Settings') ?></th>
 
@@ -66,7 +67,8 @@
                         <th><?php echo $this->lang->line('Date') ?></th>
                         <th>Date Time</th>
                         <th><?php echo $this->lang->line('Amount') ?></th>
-                        <th>Delivery Boy</th>
+                        <th><?php echo $this->lang->line('Profit') ?></th>
+                        <th>Salesman</th>
                         <th><?php echo $this->lang->line('Status') ?></th>
                         <th class="no-sort"><?php echo $this->lang->line('Settings') ?></th>
 
@@ -105,7 +107,7 @@
 <script type="text/javascript">
     function updateDeliveryBoy(event){
         var action_url = event.target.value;
-        if(action_url != "none"){
+        // if(action_url != "none"){
             $.ajax({
                 type: "GET",
                 beforeSend: function(request) {
@@ -116,7 +118,7 @@
                     console.log('success');
                 }
             });
-        }
+        // }
     }
     $(document).ready(function () {
         draw_data();
@@ -162,7 +164,7 @@
             var start_date = $('#start_date').val();
             var end_date = $('#end_date').val();
             if (start_date != '' && end_date != '') {
-                $('#invoices').DataTable().destroy();
+                $('#invoices').DataTable().page('first').state.save().destroy();
                 draw_data(start_date, end_date);
             } else {
                 alert("Date range is Required");

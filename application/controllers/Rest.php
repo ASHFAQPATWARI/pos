@@ -49,6 +49,7 @@ class Rest extends REST_Controller
         $this->methods['users_post']['limit'] = 100; // 100 requests per hour per user/key
         $this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
         $this->load->model('restservice_model', 'restservice');
+        $this->load->library("Aauth");
     }
 
     public function clients_get()
@@ -316,6 +317,34 @@ class Rest extends REST_Controller
         unlink('userfiles/pos_temp/' . $data['qrc']);
         unlink(FCPATH . 'userfiles/pos_temp/' . $file_name . '.pdf');
         $this->set_response(array('w' => 1), REST_Controller::HTTP_OK);
+
+    }
+
+    public function login_post()
+    {
+        $user = $this->post('username');
+        $password = $this->post('password');
+        $remember_me = $this->post('remember_me');
+        $rem = false;
+        if ($remember_me == 'on') {
+            $rem = true;
+        }
+        // $this->set_response([
+        //     'status' => FALSE . $user . '  ' . $password,
+        //     'message' => 'Products could not be found'
+        // ], REST_Controller::HTTP_OK); 
+        if ($this->aauth->login($user, $password, $rem, false)) {
+            $this->set_response([
+                'status' => TRUE . $user . '  ' . $password,
+                'message' => 'login success'
+            ], REST_Controller::HTTP_OK); 
+        } else {
+            $this->set_response([
+                'status' => FALSE . $user . '  ' . $password,
+                'message' => 'login fail'
+            ], REST_Controller::HTTP_OK); 
+            
+        }
 
     }
 

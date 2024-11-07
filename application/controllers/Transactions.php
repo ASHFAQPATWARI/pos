@@ -198,7 +198,7 @@ class Transactions extends CI_Controller
         }
         $amount += $amount2;
 
-        $activitym = "<tr><td>" . '<a href="' . base_url('invoices') . '/view_payslip?id=' . $tttid . '&inv=' . $tid . '" class="btn btn-blue btn-sm"><span class="fa fa-print" aria-hidden="true"></span></a> ' . substr($paydate, 0, 10) . "</td><td>$pmethod</td><td>" . amountExchange_s($amount, 0, $this->aauth->get_user()->loc) . "</td><td>$note</td></tr>";
+        $activitym = "<tr><td>" . '<a href="' . base_url('invoices') . '/view_payslip?id=' . $tttid . '&inv=' . $tid . '" class="btn btn-blue btn-sm"><span class="fa fa-print" aria-hidden="true"></span></a> ' . $paydate . "</td><td>$pmethod</td><td>" . amountExchange(0, 0, $this->aauth->get_user()->loc) . "</td><td>" . amountExchange($amount, 0, $this->aauth->get_user()->loc) . "</td><td>$note</td></tr>";
         $dual = $this->custom->api_config(65);
         if ($dual['key1']) {
 

@@ -200,6 +200,7 @@ class Search_products extends CI_Controller
 			$i = 1;
 			foreach ($result as $row) {
 				$addr = trim(preg_replace('/\s+/', ' ', $row['address']));
+				$addr = str_replace("'", " ", $addr);
 				echo "<li onClick=\"PselectCustomer('" . $row['id'] . "','" . $row['name'] . " ( " . $addr . ") " . "','" . amountFormat_general($row['discount_c']) . "')\"><span>$i</span><p style=\"margin-bottom:0px;\">" . $row['name'] . " &nbsp; &nbsp  " . $row['phone'] . "</p></li><p style=\"color: red;\">" . $addr . "<a style=\"margin-left: 5px;\" target=\"_blank\" href=\"/customers/view?id=" . $row['id'] . "\">edit</a></p>";
 				$i++;
 			}
@@ -314,12 +315,13 @@ class Search_products extends CI_Controller
                                              src="' . base_url('userfiles/product/' . $row['image']) . '"  style="max-height: 100%;max-width: 100%">
                                         <div class="text-xs-center text">
                                        
-                                            <small style="white-space: pre-wrap;">' . $row['product_name'] . '</small>
+                                            <small style="white-space: pre-wrap;">' . $row['product_name'] . " - " . $row['product_code'] . '</small>
                                             <br/>
-                                            <small class="p-cost" style="white-space: pre-wrap;"> Cost: ' . $row['fproduct_price'] . '</small>
+											<small class="p-cost" style="white-space: pre-wrap;"> Cost: ' . $row['fproduct_price'] . '</small>
                                             <br/>
                                             <small style="white-space: pre-wrap;"> MRP: ' . $row['product_price'] . '</small>
-
+                                            <br/>
+											<small style="white-space: pre-wrap;"> Qty: ' . $row['qty'] . '</small>
                                             
                                         </div></a>
                                   

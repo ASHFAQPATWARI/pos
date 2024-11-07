@@ -213,7 +213,7 @@ class CI_Security {
 		{
 			return $this->csrf_set_cookie();
 		}
-
+		// return $this->csrf_set_cookie();
 		// Check if URI has been whitelisted from CSRF checks
 		if ($exclude_uris = config_item('csrf_exclude_uris'))
 		{
@@ -248,7 +248,8 @@ class CI_Security {
 
 		if ($valid !== TRUE)
 		{
-			$this->csrf_show_error();
+			// $this->csrf_show_error();
+			show_error('The action you have requested is not allowed. ' . join('::', $_POST) . ' ' . isset($_POST[$this->_csrf_token_name]) . "**** " . $valid , 403);
 		}
 
 		log_message('info', 'CSRF token verified');

@@ -17,7 +17,11 @@
     $('.date30_plus').datepicker({autoHide: true, format: '<?php echo $this->config->item('dformat2'); ?>'});
     $('.date30_plus').datepicker('setDate', '<?php echo dateformat(date('Y-m-d', strtotime('+30 days', strtotime(date('Y-m-d'))))); ?>');
 
+    $('.sameday').datepicker({autoHide: true, format: '<?php echo $this->config->item('dformat2'); ?>'});
+    $('.sameday').datepicker('setDate', '<?php echo dateformat(date('Y-m-d', strtotime(date('Y-m-d')))); ?>');
 
+    // Added by Ashfaq to remove activate alert
+    $('a:contains("activate")').parent().remove();
 
 </script>
 <script src="<?= assets_url() ?>app-assets/vendors/js/extensions/unslider-min.js"></script>

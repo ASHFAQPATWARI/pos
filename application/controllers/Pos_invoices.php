@@ -288,8 +288,9 @@ class Pos_invoices extends CI_Controller
             //Invoice Data
             $bill_date = datefordatabase($invoicedate);
             $bill_due_date = datefordatabase($invocieduedate);
-            date_default_timezone_set('Asia/Kolkata');
-            $bill_invoicedatetime = datefordatabase(date('d-m-Y H:i:s'));
+            date_default_timezone_set("Asia/Kuwait");
+            $time = new DateTime($invoicedate . ' ' . date("h:i:sa"));
+            $bill_invoicedatetime = datefordatabase($time->format('d-m-Y h:i:sa'));
             $promo_flag = false;
             if ($coupon) {
                 $this->db->select('*');
@@ -552,8 +553,9 @@ class Pos_invoices extends CI_Controller
             //Invoice Data
             $bill_date = datefordatabase($invoicedate);
             $bill_due_date = datefordatabase($invocieduedate);
-            date_default_timezone_set('Asia/Kolkata');
-            $bill_invoicedatetime = datefordatabase(date('m-d-Y H:i:s'));
+            date_default_timezone_set("Asia/Kuwait");
+            $time = new DateTime($invoicedate . ' ' . date("h:i:sa"));
+            $bill_invoicedatetime = datefordatabase($time->format('d-m-Y h:i:sa'));
 
             $promo_flag = false;
             if ($coupon) {
@@ -903,7 +905,9 @@ class Pos_invoices extends CI_Controller
         $no = $this->input->post('start');
 
         foreach ($list as $invoices) {
-             $options = '<option value="none">none</option>';
+            
+            $deleteDeliveryBoyUrl = base_url() . 'DeliveryBoys/deleteDeliveryBoy?tid=' . $invoices->id;
+            $options = '<option value="' . $deleteDeliveryBoyUrl . '">none</option>';
             foreach ($delivery_boys as $row) {
                 $url = base_url() . 'DeliveryBoys/upsertboy?tid=' . $invoices->id . '&boyid=' . $row['boy_id'];
                 $selectedOption = '<option value="' . $url . '"';
@@ -916,12 +920,13 @@ class Pos_invoices extends CI_Controller
             $row = array();
             $row[] = $no;
             $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '">&nbsp; ' . $invoices->tid . '</a>';
-            $row[] = $invoices->name;
+            $row[] = '<a target="_blank" href="customers/view?id=' . $invoices->custid . '">' . $invoices->name . '</a>';
             $row[] = dateformat($invoices->invoicedate);
             $date1 = new DateTime($invoices->invoicedatetime);
             $formattedDate = $date1->format('d-m-Y h:i:s A');
             $row[] = $invoices->invoicedatetime ? $formattedDate : '';
             $row[] = amountExchange($invoices->total, 0, $this->aauth->get_user()->loc);
+            $row[] = amountExchange($invoices->col1, 0, $this->aauth->get_user()->loc);
             $row[] = '<select name="dby_select" class="form-control" onchange="updateDeliveryBoy(event)">'. $options .'</select>';
             $row[] = '<span class="st-' . $invoices->status . '">' . $this->lang->line(ucwords($invoices->status)) . '</span>';
             $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-sm" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . base_url("pos_invoices/thermal_pdf?id=$invoices->id") . '&d=1" class="btn btn-info btn-sm"  title="Download"><span class="fa fa-download"></span></a>&nbsp;<a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-sm delete-object"><span class="fa fa-trash"></span></a>';
@@ -1092,7 +1097,7 @@ class Pos_invoices extends CI_Controller
         $coupon_n = '';
         $account = $this->input->post('account', true);
         $customer_id = $this->input->post('customer_id');
-        $invocieno_n = $this->input->post('invoiceno');
+        $invocieno_n = $this->input->post('invocieno');
         $invocieno = $this->input->post('iid');
         $invoicedate = $this->input->post('invoicedate');
         $invocieduedate = $this->input->post('invocieduedate');
@@ -1111,7 +1116,10 @@ class Pos_invoices extends CI_Controller
             $total = rev_amountExchange_s($this->input->post('total'), $currency, $this->aauth->get_user()->loc);
             $old_total = rev_amountExchange_s($this->input->post('old_total'), $currency, $this->aauth->get_user()->loc);
             $total_tax = 0;
-            $total_discount = 0;
+            // Changes done by Ashfaq for fixing extra discount issue
+            // $total_discount = 0;
+            $disc_val = numberClean($this->input->post('disc_val'));
+            $total_discount = rev_amountExchange_s($this->input->post('after_disc'), $currency, $this->aauth->get_user()->loc);;
             $discountFormat = $this->input->post('discountFormat');
             $pterms = $this->input->post('pterms');
             //edit
@@ -1139,8 +1147,9 @@ class Pos_invoices extends CI_Controller
             $transok = true;
             $bill_date = datefordatabase($invoicedate);
             $bill_due_date = datefordatabase($invocieduedate);
-            // date_default_timezone_set('Asia/Kolkata');
-            // $bill_invoicedatetime = datefordatabase(date('d-m-Y H:i:s'));
+            date_default_timezone_set("Asia/Kuwait");
+            $time = new DateTime($invoicedate . ' ' . date("h:i:sa"));
+            $bill_invoicedatetime = datefordatabase($time->format('d-m-Y h:i:sa'));
             $promo_flag = false;
             if ($coupon) {
                 $this->db->select('*');
@@ -1156,7 +1165,7 @@ class Pos_invoices extends CI_Controller
                 }
             }
             //'invoicedatetime' => $bill_invoicedatetime,
-            $data = array('invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency);
+            $data = array('tid' => $invocieno_n, 'invoicedatetime' => $bill_invoicedatetime, 'invoicedate' => $bill_date, 'invoiceduedate' => $bill_due_date, 'subtotal' => $subtotal, 'shipping' => $shipping, 'ship_tax' => $shipping_tax, 'ship_tax_type' => $ship_taxtype, 'discount_rate' => $disc_val,  'total' => $total, 'notes' => $notes, 'csd' => $customer_id, 'taxstatus' => $tax, 'discstatus' => $discstatus, 'format_discount' => $discountFormat, 'refer' => $refer, 'term' => $pterms, 'multi' => $currency);
             $this->db->set($data);
             $this->db->where('id', $invocieno);
             if ($this->db->update('geopos_invoices', $data)) {
@@ -1250,7 +1259,7 @@ class Pos_invoices extends CI_Controller
                         $r_amt3 = $diff;
                         break;
                 }
-                $this->billing->paynow($invocieno, $diff, $tnote, $pmethod, $this->aauth->get_user()->loc, 0, $account);
+                if($diff) $this->billing->paynow($invocieno, $diff, $tnote, $pmethod, $this->aauth->get_user()->loc, 0, $account);
                 $this->registerlog->update($this->aauth->get_user()->id, $r_amt1, $r_amt2, $r_amt3, 0, $c_amt);
                 if ($promo_flag) {
                     $cqty = $result_c['available'] - 1;

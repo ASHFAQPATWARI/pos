@@ -26,7 +26,7 @@
 
 
                         <div class="ibox-content mt-2">
-                            <img alt="image" id="dpic" class="card-img-top img-fluid"
+                            <img alt="image" id="dpic" class="rounded-circle img-border height-150"
                                  src="<?php echo base_url('userfiles/customers/') . $details['picture'] ?>">
                         </div>
                         <hr>
