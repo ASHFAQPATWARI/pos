@@ -86,6 +86,24 @@
                         <option value="0"><?php echo $this->lang->line('No') ?></option>
                     </select>
                 </div>
+            </div>            <div class="form-group row">
+
+                <label class="col-sm-5 col-form-label"
+                       for="enable"><?php echo $this->lang->line('AutoDebitTransaction') ?></label>
+
+                <div class="col-sm-5"><p>Auto Debit Transaction useful to generate due statements in some regions.</p>
+                    <select class="form-control" name="auto_debit">
+                        <option value="<?php echo $online_pay['bank'] ?>">
+                            --<?php if ($current['key2']==1) {
+                                echo $this->lang->line('Yes');
+                            } else {
+                                echo $this->lang->line('No');
+                            } ?>--
+                        </option>
+                        <option value="1"><?php echo $this->lang->line('Yes') ?></option>
+                        <option value="0"><?php echo $this->lang->line('No') ?></option>
+                    </select>
+                </div>
             </div>
 
 

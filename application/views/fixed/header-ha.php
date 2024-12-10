@@ -46,11 +46,11 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item d-none d-md-block nav-link "><a href="<?= base_url() ?>pos_invoices/create"
+                    <?php    if ($this->aauth->premission(12)) { ?> <li class="nav-item d-none d-md-block nav-link "><a href="<?= base_url() ?>pos_invoices/create"
                                                                         class="btn btn-info btn-md t_tooltip"
                                                                         title="Access POS"><i
                                     class="icon-handbag"></i><?php echo $this->lang->line('POS') ?> </a>
-                    </li>
+                    </li>  <?php    } ?>
                     <li class="nav-item nav-search"><a class="nav-link nav-link-search" href="#" aria-haspopup="true"
                                                        aria-expanded="false" id="search-input"><i
                                     class="ficon ft-search"></i></a>
@@ -583,7 +583,7 @@
 
 <!-- ////////////////////////////////////////////////////////////////////////////-->
 <!-- Horizontal navigation-->
-<div class="header-navbar navbar-expand-sm navbar navbar-horizontal navbar-fixed navbar-light navbar-without-dd-arrow navbar-shadow menu-border"
+<div class="high-z-index header-navbar navbar-expand-sm navbar navbar-horizontal navbar-fixed navbar-light navbar-without-dd-arrow navbar-shadow menu-border"
      role="navigation" data-menu="menu-wrapper">
     <!-- Horizontal menu content-->
     <div class="navbar-container main-menu-content" data-menu="menu-container">
@@ -599,6 +599,7 @@
                                                                       data-toggle="dropdown"><i
                                 class="icon-basket-loaded"></i><span><?php echo $this->lang->line('sales') ?></span></a>
                     <ul class="dropdown-menu">
+                        <?php    if ($this->aauth->premission(12)) { ?>
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
                                     class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
                                         class="icon-paper-plane"></i><?php echo $this->lang->line('pos sales') ?></a>
@@ -614,8 +615,10 @@
                                 <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>pos_invoices"
                                                     data-toggle="dropdown"><?php echo $this->lang->line('Manage Invoices'); ?></a>
                                 </li>
+
                             </ul>
                         </li>
+                        <?php } ?>
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
                                     class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
                                         class="icon-basket"></i><?php echo $this->lang->line('sales') ?></a>
@@ -626,6 +629,7 @@
 
                                 <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>invoices"
                                                     data-toggle="dropdown"><?php echo $this->lang->line('Manage Invoices'); ?></a>
+
                             </ul>
                         </li>
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
@@ -965,6 +969,8 @@
                                                     href="<?php echo base_url(); ?>reports/taxstatement"
                                                     data-toggle="dropdown"><?php echo $this->lang->line('TAX_Statements'); ?></a>
                                 </li>
+                                 <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>pos_invoices/extended"
+                                                          data-toggle="dropdown"><?php echo $this->lang->line('ProductSales'); ?></a></li>
                             </ul>
                         </li>
 
@@ -1029,6 +1035,9 @@
                                 </li>
                                 <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>reports/weight"
                                                     data-toggle="dropdown">Weight</a>
+                                </li>
+                                <li data-menu=""><a class="dropdown-item" href="<?php echo base_url(); ?>reports/salesmanstatement"
+                                                    data-toggle="dropdown">Salesman Statement</a>
                                 </li>
                                 <li data-menu=""><a class="dropdown-item"
                                                     href="<?php echo base_url(); ?>reports/products"
@@ -1185,7 +1194,7 @@
 </div>
 <!-- Horizontal navigation-->
 <div id="c_body"></div>
-<div class="app-content content">
+<div class="app-content content z-index-down">
     <div class="content-wrapper">
         <div class="content-header row">
         </div>

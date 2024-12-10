@@ -46,6 +46,14 @@ class DeliveryBoys extends CI_Controller
         
         redirect('pos_invoices/view?id=' . $tid);
     }
+
+    public function deleteDeliveryBoy()
+    {
+
+        $tid = $this->input->get('tid');
+        $this->delivery_model->deleteDeliveryBoyToInvoice($tid);
+        
+    }
     
     
     public function upsertboy()

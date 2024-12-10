@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class to handle coupon operations
  * Changes by Alex Rabinovich (@putchi)
@@ -79,7 +80,7 @@ class Coupon {
      * @param $filename
      * @param array $options
      */
-    static public function generate_coupons_to_xls($maxNumberOfCoupons = 1, $filename, $options = []) {
+    static public function generate_coupons_to_xls($maxNumberOfCoupons , $filename, $options = []) {
         $filename = (empty(trim($filename)) ? 'coupons' : trim($filename));
         header('Content-Type: application/vnd.ms-excel');
         echo 'Coupon Codes' . "\t\n";

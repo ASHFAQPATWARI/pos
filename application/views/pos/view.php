@@ -35,12 +35,12 @@
                                     <a class="dropdown-item"
                                        href="<?php echo 'thermal_pdf?id=' . $invoice['iid']; ?>"><?php echo $this->lang->line('PDF Print') ?></a>
                                     <div class="dropdown-divider"></div>
-                                    <?php if ($printer['val2'] == 'server') {
+                                    <?php if (@$printer['val2'] == 'server') {
                                         echo '<a class="dropdown-item" id="thermal_server"
                                            data-ptid="' . $invoice['iid'] . '"  data-url="' . $printer['val3'] . '">' . $this->lang->line('Thermal Print') . '</a>';
                                     } else {
                                         echo '<a class="dropdown-item" id="thermal_p"
-                                           data-ptid="' . $invoice['iid'] . '"  data-url="' . $printer['val3'] . '">' . $this->lang->line('Thermal Print') . '</a>';
+                                           data-ptid="' . $invoice['iid'] . '"  data-url="' . @$printer['val3'] . '">' . $this->lang->line('Thermal Print') . '</a>';
                                     }
                                     ?>
 
@@ -158,7 +158,7 @@
                                 <div class="btn-group ">
                                     <button type="button" class="btn btn-primary mb-1 btn-min-width dropdown-toggle"
                                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Assign Delivery Boy
+                                            Assign Salesman
                                     </button>
                                     <div class="dropdown-menu">
                                     <?php 
@@ -174,7 +174,7 @@
                                 <div class="btn-group ">
                                     <button type="button" class="btn btn-primary mb-1 btn-min-width dropdown-toggle"
                                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Update Delivery Boy
+                                            Update Salesman
                                     </button>
                                     <div class="dropdown-menu">
                                     <?php 
@@ -248,7 +248,7 @@
                         <?php if($invoice['invoicedatetime']) {
                             $date = new DateTime($invoice['invoicedatetime']);
                             $formattedDate = $date->format('d-m-Y h:i:s A');
-                            echo '<p><span class="text-muted">' . $this->lang->line('Invoice Date') . '  :</span> ' . $formattedDate . '</p> <p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ' . dateformat($invoice['invoiceduedate']) . '</p>  <p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>  <p><span class="text-muted">' . 'Delivery Boy' . ' :</span> ' . $delivery_boy['boy_name'] . ' (' . $delivery_boy['phone'] . ')'. '</p>';
+                            echo '<p><span class="text-muted">' . $this->lang->line('Invoice Date') . '  :</span> ' . $formattedDate . '</p> <p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ' . dateformat($invoice['invoiceduedate']) . '</p>  <p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>  <p><span class="text-muted">' . 'Salesman' . ' :</span> ' . $delivery_boy['boy_name'] . ' (' . $delivery_boy['phone'] . ')'. '</p>';
                         }
                         else {
                             echo '<p><span class="text-muted">' . $this->lang->line('Invoice Date') . '  :</span> ' . dateformat($invoice['invoicedate']) . '</p> <p><span class="text-muted">' . $this->lang->line('Due Date') . ' :</span> ' . dateformat($invoice['invoiceduedate']) . '</p>  <p><span class="text-muted">' . $this->lang->line('Terms') . ' :</span> ' . $invoice['termtit'] . '</p>';
@@ -283,7 +283,9 @@
                                 $sub_t = 0;
 
                                 foreach ($products as $row) {
-                                    $sub_t += $row['price'] * $row['qty'];
+                                    // Using subtotal instead of calculating
+                                    // $sub_t += $row['price'] * $row['qty']; // commented by ashfaq
+                                    $sub_t += $row['subtotal'];
                                     $gst = $row['totaltax'] / 2;
                                     $rate = $row['tax'] / 2;
                                     echo '<tr>
@@ -324,7 +326,9 @@
                                     $sub_t = 0;
 
                                     foreach ($products as $row) {
-                                        $sub_t += $row['price'] * $row['qty'];
+                                        // Using subtotal instead of calculating
+                                        // $sub_t += $row['price'] * $row['qty']; // commented by ashfaq
+                                        $sub_t += $row['subtotal'];
 
                                         echo '<tr>
 <th scope="row">' . $c . '</th>
@@ -361,7 +365,9 @@
                                     $sub_t = 0;
 
                                     foreach ($products as $row) {
-                                        $sub_t += $row['price'] * $row['qty'];
+                                        // Using subtotal instead of calculating
+                                        // $sub_t += $row['price'] * $row['qty']; // commented by ashfaq
+                                        $sub_t += $row['subtotal'];
                                         echo '<tr>
 <th scope="row">' . $c . '</th>
                             <td>' . $row['product'] . '</td>                           
@@ -464,7 +470,7 @@
                         <tr>
                             <th><?php echo $this->lang->line('Date') ?></th>
                             <th><?php echo $this->lang->line('Method') ?></th>
-                            <!--<th><?php echo $this->lang->line('Amount') ?></th>-->
+
                             <th><?php echo $this->lang->line('Debit') ?></th>
                             <th><?php echo $this->lang->line('Credit') ?></th>
 

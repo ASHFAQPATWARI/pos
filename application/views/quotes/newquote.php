@@ -118,7 +118,7 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar-o"
                                                                                  aria-hidden="true"></span></div>
-                                            <input type="text" class="form-control required date30"
+                                            <input type="text" class="form-control required date30_plus"
                                                    name="invocieduedate"
                                                    placeholder="Due Date" data-toggle="datepicker" autocomplete="false">
                                         </div>

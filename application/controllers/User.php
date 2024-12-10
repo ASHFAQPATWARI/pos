@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -171,11 +171,17 @@ class User extends CI_Controller
             $region = $this->input->post('region', true);
             $country = $this->input->post('country', true);
             $postbox = $this->input->post('postbox', true);
+            $lang = $this->input->post('language', true);
             $this->employee->update_employee($id, $name, $phone, $phonealt, $address, $city, $region, $country, $postbox, $this->aauth->get_user()->loc);
+            $this->db->set('lang',$lang);
+            $this->db->where('id', $id);
+            $this->db->update('geopos_users');
 
         } else {
             $head['usernm'] = $this->aauth->get_user()->username;
             $head['title'] = $head['usernm'] . ' Profile';
+            $this->load->library("Common");
+            $data['langs'] = $this->common->current_language($this->aauth->get_user()->lang);
 
 
             $data['user'] = $this->employee->employee_details($id);
@@ -198,12 +204,20 @@ class User extends CI_Controller
         $this->load->model('employee_model', 'employee');
         $id = $this->aauth->get_user()->id;
         $this->load->library("uploadhandler", array(
-            'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/employee/'
+            'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/employee/',
+			'max_width'=>500,
+			'max_height'=>500,
+			'print_response'=>false
         ));
-        $img = (string)$this->uploadhandler->filenaam();
-        if ($img != '') {
-            $this->employee->editpicture($id, $img);
-        }
+
+		if (isset($this->uploadhandler->response['files'][0]->name) AND !isset($this->uploadhandler->response['files'][0]->error)) {
+			$this->employee->editpicture($id, $this->uploadhandler->response['files'][0]->name);
+		}
+		echo json_encode($this->uploadhandler->response['files'][0]) ;
+
+
+
+
 
 
     }
@@ -218,12 +232,17 @@ class User extends CI_Controller
         $this->load->model('employee_model', 'employee');
         $id = $this->aauth->get_user()->id;
         $this->load->library("uploadhandler", array(
-            'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/employee_sign/'
+            'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/employee_sign/',
+			'max_width'=>250,
+			'max_height'=>160,
+			'print_response'=>false
         ));
-        $img = (string)$this->uploadhandler->filenaam();
-        if ($img != '') {
-            $this->employee->editsign($id, $img);
-        }
+
+		if (isset($this->uploadhandler->response['files'][0]->name) AND !isset($this->uploadhandler->response['files'][0]->error)) {
+			$this->employee->editsign($id, $this->uploadhandler->response['files'][0]->name);
+		}
+		echo json_encode($this->uploadhandler->response['files'][0]) ;
+
 
 
     }

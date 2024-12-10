@@ -133,7 +133,7 @@
     </table>
     <hr>
     <div class="text-center">  <?php echo $this->lang->line('Thank you') ?></div>
-    <?php if ($qrc AND $invoice['status'] != 'paid') { ?>
+    <?php if (@$qrc and $invoice['status'] != 'paid') { ?>
         <div class="text-center">
             <small><?php echo $this->lang->line('Scan & Pay') ?></small>
             <img style="max-height:230px;" src='<?php echo base_url('userfiles/pos_temp/' . $qrc) ?>' alt='QR'></div>

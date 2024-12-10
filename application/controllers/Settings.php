@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -124,12 +124,18 @@ class Settings extends CI_Controller
     {
         $id = $this->input->get('id');
         $this->load->library("uploadhandler", array(
-            'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/company/'
+            'accept_file_types' => '/\.(gif|jpe?g|png)$/i', 'upload_dir' => FCPATH . 'userfiles/company/',
+			'max_width'=>500,
+			'max_height'=>500,
+			'print_response'=>false
         ));
-        $img = (string)$this->uploadhandler->filenaam();
-        if ($img != '') {
-            $this->settings->companylogo($id, $img);
-        }
+
+
+
+       if (isset($this->uploadhandler->response['files'][0]->name) AND !isset($this->uploadhandler->response['files'][0]->error)) {
+         $this->settings->companylogo($id, $this->uploadhandler->response['files'][0]->name);
+       }
+		echo json_encode($this->uploadhandler->response['files'][0]) ;
     }
 
     //tax
@@ -287,8 +293,13 @@ class Settings extends CI_Controller
     public function themelogo()
     {
         $this->load->library("uploadhandler", array(
-            'accept_file_types' => '/\.(png)$/i', 'upload_dir' => FCPATH . 'userfiles/theme/', 'name' => 'logo-header.png'
+            'accept_file_types' => '/\.(png)$/i', 'upload_dir' => FCPATH . 'userfiles/theme/', 'name' => 'logo-header.png',
+			'max_width'=>200,
+			'max_height'=>200,
+			'print_response'=>false
         ));
+
+		echo json_encode($this->uploadhandler->response['files'][0]) ;
     }
 
     public function tickets()

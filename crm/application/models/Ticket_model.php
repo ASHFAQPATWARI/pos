@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Software
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -16,7 +16,7 @@
  * ***********************************************************************
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Ticket_model extends CI_Model
 {
@@ -68,12 +68,33 @@ class Ticket_model extends CI_Model
 
         $valid = $this->thread_info($thread_id);
 
-        if($valid['cid']==$this->session->userdata('user_details')[0]->cid) {
+        if ($valid['cid'] == $this->session->userdata('user_details')[0]->cid) {
+            $multi = array();
 
-            $data = array('tid' => $thread_id, 'message' => $message, 'cid' => $this->session->userdata('user_details')[0]->cid, 'eid' => 0, 'cdate' => date('Y-m-d H:i:s'), 'attach' => $filename);
             $data1 = array(
                 'status' => 'Waiting'
             );
+
+            if (is_array($filename)) {
+                $i = 2;
+                foreach ($filename as $file) {
+
+                    $multi[] = array('tid' => $thread_id, 'message' => $message, 'cid' => $this->session->userdata('user_details')[0]->cid, 'eid' => 0, 'cdate' => date('Y-m-d H:i:s'), 'attach' => $file);
+
+                    $message = 'Attachment ' . $i;
+                    $i++;
+
+                }
+
+
+            } else {
+
+                $data = array('tid' => $thread_id, 'message' => $message, 'cid' => $this->session->userdata('user_details')[0]->cid, 'eid' => 0, 'cdate' => date('Y-m-d H:i:s'), 'attach' => $filename);
+                $data1 = array(
+                    'status' => 'Waiting'
+                );
+
+            }
 
 
             $this->db->set($data1);
@@ -87,10 +108,10 @@ class Ticket_model extends CI_Model
 
             }
 
+            if (isset($multi[0])) return $this->db->insert_batch('geopos_tickets_th', $multi);
 
             return $this->db->insert('geopos_tickets_th', $data);
-        }
-        else{
+        } else {
             return false;
         }
 
@@ -103,14 +124,30 @@ class Ticket_model extends CI_Model
         $this->db->insert('geopos_tickets', $data);
         $thread_id = $this->db->insert_id();
 
+        $multi = array();
 
-        $data = array('tid' => $thread_id, 'message' => $message, 'cid' => $this->session->userdata('user_details')[0]->cid, 'eid' => 0, 'cdate' => date('Y-m-d H:i:s'), 'attach' => $filename);
+        if (is_array($filename)) {
+            $i = 2;
+            foreach ($filename as $file) {
+                $multi[] = array('tid' => $thread_id, 'message' => $message, 'cid' => $this->session->userdata('user_details')[0]->cid, 'eid' => 0, 'cdate' => date('Y-m-d H:i:s'), 'attach' => $file);
+                $message = 'Attachment ' . $i;
+                $i++;
+
+            }
+
+
+        } else {
+            $data = array('tid' => $thread_id, 'message' => $message, 'cid' => $this->session->userdata('user_details')[0]->cid, 'eid' => 0, 'cdate' => date('Y-m-d H:i:s'), 'attach' => '');
+        }
+
         if ($this->ticket()->key2) {
 
 
             $this->send_email($this->ticket()->url, $this->ticket()->name, '[Customer Ticket] #' . $thread_id, $message, $attachmenttrue = false, $attachment = '');
 
         }
+
+        if (isset($multi[0])) return $this->db->insert_batch('geopos_tickets_th', $multi);
 
         return $this->db->insert('geopos_tickets_th', $data);
 
@@ -127,7 +164,7 @@ class Ticket_model extends CI_Model
         $host = $smtpresult['host'];
         $port = $smtpresult['port'];
         $auth = $smtpresult['auth'];
-		$auth_type = $smtpresult['auth_type'];
+        $auth_type = $smtpresult['auth_type'];
         $username = $smtpresult['username'];;
         $password = $smtpresult['password'];
         $mailfrom = $smtpresult['sender'];

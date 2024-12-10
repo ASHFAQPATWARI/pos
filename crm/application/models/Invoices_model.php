@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Software
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -23,7 +23,7 @@ class Invoices_model extends CI_Model
     var $table = 'geopos_invoices';
     var $column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $column_search = array('tid', 'name', 'invoicedate', 'total');
-    var $order = array('tid' => 'desc');
+    var $order = array('invoicedate' => 'desc');
 
     public function __construct()
     {

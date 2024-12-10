@@ -83,7 +83,6 @@
 
             //datatables
             $('#catgtable').DataTable({
-                "lengthMenu": [[100, 25, 50, -1], [100, 25, 50, "All"]],
                 responsive: true, <?php datatable_lang();?> dom: 'Blfrtip',
                 buttons: [
                     {

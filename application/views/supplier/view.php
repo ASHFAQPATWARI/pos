@@ -60,7 +60,10 @@
                                             <span class="badge tag-default tag-pill bg-danger float-xs-right"> <?php echo amountExchange($money['debit'], 0, $this->aauth->get_user()->loc) ?></span>
                                             <?php echo $this->lang->line('Expenses') ?>
                                         </li>
-
+                                        <li class="list-group-item">
+                                            <span class="badge tag-default tag-pill bg-pink float-xs-right"><?php echo amountExchange($due['total'] - $due['pamnt']) ?></span>
+                                            <?php echo $this->lang->line('Total Due') ?>
+                                        </li>
                                     </ul>
 
                                 </div>

@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -20,7 +20,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Promo_model extends CI_Model
 {
-
     var $table = 'geopos_promo';
     var $column_order = array(null, 'code', 'valid', 'amount', null);
     var $column_search = array('code', 'valid', 'amount');
@@ -46,10 +45,10 @@ class Promo_model extends CI_Model
         foreach ($this->column_search as $item) // loop column
         {
             $search = $this->input->post('search');
-            $value = $search['value'];
-            if ($value) // if datatable send POST for search
-            {
 
+            if ($search) // if datatable send POST for search
+            {
+                $value = $search['value'];
                 if ($i === 0) // first loop
                 {
                     $this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.

@@ -53,6 +53,13 @@ class Delivery_model extends CI_Model
         $this->db->insert('geopos_delivery_boy_to_invoice', $data);
     }
 
+    public function deleteDeliveryBoyToInvoice($invoiceId) {
+        $data = array(
+            'invoice_id' => $invoiceId
+        );
+        $this->db->delete('geopos_delivery_boy_to_invoice', $data);
+    }
+
     public function updateDeliveryBoyToInvoice($boyId, $invoiceId) {
         $data = array(
             'boy_id' => $boyId,

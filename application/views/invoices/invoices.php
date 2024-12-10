@@ -110,7 +110,7 @@
                 'stateSave': true,
                 <?php datatable_lang();?>
                 responsive: true,
-                "lengthMenu": [[100, 250, 500, -1], [100, 250, 500, "All"]],
+                "lengthMenu": [[20, 50, 100, 250, 500, -1], [20, 50, 100, 250, 500, "All"]],
                 'order': [],
                 'ajax': {
                     'url': "<?php echo site_url('invoices/ajax_list')?>",
@@ -144,7 +144,7 @@
             var start_date = $('#start_date').val();
             var end_date = $('#end_date').val();
             if (start_date != '' && end_date != '') {
-                $('#invoices').DataTable().destroy();
+                $('#invoices').DataTable().page('first').state.save().destroy();
                 draw_data(start_date, end_date);
             } else {
                 alert("Date range is Required");

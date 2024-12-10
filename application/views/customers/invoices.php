@@ -302,7 +302,7 @@
                 'serverSide': true,
                 'stateSave': true,
                 responsive: true,
-                "lengthMenu": [[100, 250, 500, -1], [100, 250, 500, "All"]],
+                "lengthMenu": [[20, 50, 100, 250, 500, -1], [20, 50, 100, 250, 500, "All"]],
                 <?php datatable_lang();?>
                 'order': [],
                 'ajax': {

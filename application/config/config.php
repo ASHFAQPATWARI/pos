@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 
 //$config['base_url'] = 'http://18.219.104.78/';
-$config['base_url'] = 'http://localhost:8888/posserver/';
+$config['base_url'] = 'http://localhost:8888/alhasanipos/';
 
 
 /*

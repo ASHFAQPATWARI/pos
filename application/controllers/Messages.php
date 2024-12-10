@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -42,7 +42,8 @@ class Messages extends CI_Controller
     public function index()
     {
 
-        $this->load->view('fixed/header');
+        $head['title'] = "Messages";
+        $this->load->view('fixed/header',$head);
         $this->load->view('messages/index');
         $this->load->view('fixed/footer');
     }
@@ -72,13 +73,13 @@ class Messages extends CI_Controller
     public function view()
     {
 
-
+        $head['title'] = "Messages";
         $data['pmid'] = $this->input->get('id');
         $this->aauth->set_as_read_pm($data['pmid']);
         $this->load->model('message_model', 'message');
         $data['employee'] = $this->message->employee_details($data['pmid']);
 
-        $this->load->view('fixed/header');
+        $this->load->view('fixed/header',$head);
         $this->load->view('messages/view', $data);
         $this->load->view('fixed/footer');
 

@@ -143,7 +143,7 @@
     </table>
     <hr>
     <div class="text-center">  <?php echo $this->lang->line('Thank you') ?></div>
-    <?php if (@$qrc AND $invoice['status'] != 'paid') {
+    <?php if (@$qrc and $invoice['status'] != 'paid') {
 
         $this->pheight = $this->pheight + 40;
         ?>

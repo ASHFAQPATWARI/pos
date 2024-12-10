@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -29,7 +29,7 @@ class Customers_model extends CI_Model
     var $inv_column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $inv_column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('id' => 'desc');
-    var $inv_order = array('geopos_invoices.tid' => 'desc');
+    var $inv_order = array('geopos_invoices.id' => 'desc');
     var $qto_order = array('geopos_quotes.tid' => 'desc');
     var $notecolumn_order = array(null, 'title', 'cdate', null);
     var $notecolumn_search = array('id', 'title', 'cdate');
@@ -48,6 +48,7 @@ class Customers_model extends CI_Model
             $this->db->select('geopos_customers.*,SUM(geopos_invoices.total) AS total,SUM(geopos_invoices.pamnt) AS pamnt');
             $this->db->from('geopos_invoices');
             $this->db->where('geopos_invoices.status!=', 'paid');
+            $this->db->where('geopos_invoices.status!=', 'canceled');
             $this->db->join('geopos_customers', 'geopos_customers.id = geopos_invoices.csd', 'left');
             if ($this->aauth->get_user()->loc) {
                 $this->db->where('geopos_customers.loc', $this->aauth->get_user()->loc);
@@ -140,6 +141,17 @@ class Customers_model extends CI_Model
         }
         $query = $this->db->get();
         return $query->num_rows($id = '');
+    }
+
+    public function count_allDue($id = '')
+    {
+        $query = $this->db->query("SELECT SUM(geopos_invoices.total) AS total,SUM(geopos_invoices.pamnt) AS pamnt
+        FROM geopos_invoices
+        LEFT JOIN geopos_customers ON geopos_customers.id=geopos_invoices.csd
+        WHERE geopos_invoices.status NOT IN ('paid', 'canceled')
+        GROUP BY geopos_invoices.csd;");
+        $result = $query->result_array();
+        return $result;
     }
 
     public function details($custid,$loc=true)

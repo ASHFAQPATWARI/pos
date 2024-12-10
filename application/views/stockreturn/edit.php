@@ -330,7 +330,9 @@
                                id="discount_format">
                         <input type="hidden" value="<?= $invoice['taxstatus']; ?>" name="tax_handle" id="tax_status">
                         <input type="hidden" value="yes" name="applyDiscount" id="discount_handle">
+
                         <input type="hidden" value="<?php
+                        if($invoice['shipping']==0)  $invoice['shipping']=1;
                         $tt = 0;
                         if ($invoice['ship_tax_type'] == 'incl') $tt = @number_format(($invoice['shipping'] - $invoice['ship_tax']) / $invoice['shipping'], 2, '.', '');
                         echo amountFormat_general(number_format((($invoice['ship_tax'] / $invoice['shipping']) * 100) + $tt, 3, '.', '')); ?>"

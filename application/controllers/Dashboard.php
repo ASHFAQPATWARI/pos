@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -46,7 +46,6 @@ class Dashboard extends CI_Controller
         if ($this->aauth->get_user()->roleid > 3) {
             $data['todayin'] = $this->dashboard_model->todayInvoice($today);
             $data['todayprofit'] = $this->dashboard_model->todayProfit($today);
-            //  $data['todayprofit'] = $this->aauth->get_user()->loc;
             $data['todayshipping'] = $this->dashboard_model->todayShipping($today);
             $data['incomechart'] = $this->dashboard_model->incomeChart($today, $month, $year);
             $data['expensechart'] = $this->dashboard_model->expenseChart($today, $month, $year);

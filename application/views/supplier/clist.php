@@ -23,13 +23,43 @@
             </div>
             <div class="card-body">
 
-
+                <div class="card card-block">
+                    <div class="row">
+                        <div class="col-xl-3 col-lg-6 col-12">
+                            <div class="card-content">
+                                <div class="media align-items-stretch">
+                                    <div class="p-2 text-center bg-primary bg-darken-2">
+                                        <i class="fa fa-file-text-o text-bold-200  font-large-2 white"></i>
+                                    </div>
+                                    <div class="p-1 bg-gradient-x-primary white media-body">
+                                        <h5><?php echo $this->lang->line('Pending Suppliers') ?></h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-plus"></i><span class='pendingSuppliers'></span></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-12">
+                            <div class="card-content">
+                                <div class="media align-items-stretch">
+                                    <div class="p-2 text-center bg-danger bg-darken-2">
+                                        <i class="fa fa-file-text-o text-bold-200  font-large-2 white"></i>
+                                    </div>
+                                    <div class="p-1 bg-gradient-x-danger white media-body">
+                                        <h5><?php echo $this->lang->line('Pending Supplier Payment') ?></h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-plus"></i><span class='pendingSuppliersAmount'></span></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <table id="clientstable" class="table table-striped table-bordered zero-configuration" cellspacing="0"
                        width="100%">
                     <thead>
                     <tr>
                         <th>#</th>
                         <th><?php echo $this->lang->line('Name') ?></th>
+                        <th><?php echo $this->lang->line('Due') ?></th>
                         <th><?php echo $this->lang->line('Address') ?></th>
                         <th><?php echo $this->lang->line('Email') ?></th>
                         <th><?php echo $this->lang->line('Phone') ?></th>
@@ -45,6 +75,7 @@
                     <tr>
                         <th>#</th>
                         <th><?php echo $this->lang->line('Name') ?></th>
+                        <th><?php echo $this->lang->line('Due') ?></th>
                         <th><?php echo $this->lang->line('Address') ?></th>
                         <th><?php echo $this->lang->line('Email') ?></th>
                         <th><?php echo $this->lang->line('Phone') ?></th>
@@ -61,6 +92,19 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+        // Added by ashfaq to fetch total pending suppliers
+        var actionurl = baseurl + 'supplier/getTotalDue';
+        $.ajax({
+            url: actionurl,
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                $('.pendingSuppliers').html(data.totalPending);
+                $('.pendingSuppliersAmount').html(data.due);
+            },
+        });
+
         $('#clientstable').DataTable({
             'processing': true,
             'serverSide': true,

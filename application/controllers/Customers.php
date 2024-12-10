@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -364,7 +364,7 @@ class Customers extends CI_Controller
             $row[] = $invoices->invoicedate;
             $row[] = amountExchange($invoices->total, 0, $this->aauth->get_user()->loc);
             $row[] = '<span class="st-' . $invoices->status . '">' . $this->lang->line(ucwords($invoices->status)) . '</span>';
-            $row[] = '<a href="' . base_url("invoices/view?id=$invoices->id") . '" class="btn btn-success btn-xs" title="View Invoice"><i class="fa fa-file-text"></i> </a> <a href="' . base_url("invoices/printinvoice?id=$invoices->id") . '&d=1" class="btn btn-info btn-xs"  title="Download"><span class="fa fa-download"></span></a> <a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-xs delete-object" title="Delete"><span class="fa fa-trash"></span></a> ';
+            $row[] = '<a href="' . base_url("pos_invoices/view?id=$invoices->id") . '" class="btn btn-success btn-xs" title="View Invoice"><i class="fa fa-file-text"></i> </a> <a href="' . base_url("invoices/printinvoice?id=$invoices->id") . '&d=1" class="btn btn-info btn-xs"  title="Download"><span class="fa fa-download"></span></a> <a href="#" data-object-id="' . $invoices->id . '" class="btn btn-danger btn-xs delete-object" title="Delete"><span class="fa fa-trash"></span></a> ';
             $data[] = $row;
         }
         $output = array(
@@ -656,7 +656,8 @@ class Customers extends CI_Controller
             $sdate = datefordatabase($this->input->post('sdate'));
             $edate = datefordatabase($this->input->post('edate'));
             $data['customer'] = $this->customers->details($customer);
-
+            $data['startdate'] = date_format(date_create($this->input->post('sdate')), "d M Y");
+            $data['enddate'] = date_format(date_create($this->input->post('edate')), "d M Y");
 
             $data['list'] = $this->reports_model->get_customer_statements($customer, $trans_type, $sdate, $edate);
 
@@ -841,6 +842,19 @@ class Customers extends CI_Controller
 
         $due = 0;
         echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('Paid') . ' ' . amountExchange($amount), 'due' => amountExchange_s($due)));
+    }
+
+    public function getTotalDue() {
+        $data = $this->customers->count_allDue();
+        $totalDue = 0;
+        foreach ($data as $row) {
+            $totalDue += $row['total'] - $row['pamnt'];
+        }
+        $output = array(
+            "due" =>  amountExchange($totalDue),
+            "totalPending" => count($data)
+        );
+        echo json_encode($output);
     }
 
 }

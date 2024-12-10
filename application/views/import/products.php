@@ -27,7 +27,7 @@
 
                 <hr>
                 <p>Your products data file should as per this template <a
-                            href="http://ultimatekode.com/samples/products_import.csv"><strong>Download
+                            href="<?php echo base_url('userfiles/product/products_import.csv') ?>"><strong>Download
                             Template</strong></a>. Please download a database backup before importing the
                     geopos_products.
                 </p>

@@ -630,16 +630,18 @@
                             </div>
                         </div>
                     </div>
-                    <?php if(PAC) { ?>
-                      <div class="col"> <div class="form-group text-bold-600 text-g">
-                    <label for="account_p"><?php echo $this->lang->line('Account') ?></label>
+                    <?php if (PAC) { ?>
+                        <div class="col">
+                            <div class="form-group text-bold-600 text-g">
+                                <label for="account_p"><?php echo $this->lang->line('Account') ?></label>
 
-                            <select name="p_account" id="p_account" class="form-control">
-                                <?php foreach ($acc_list as $row) {
-                                    echo '<option value="' . $row['id'] . '">' . $row['holder'] . ' / ' . $row['acn'] . '</option>';
-                                }
-                                ?>
-                            </select></div></div>
+                                <select name="p_account" id="p_account" class="form-control">
+                                    <?php foreach ($acc_list as $row) {
+                                        echo '<option value="' . $row['id'] . '">' . $row['holder'] . ' / ' . $row['acn'] . '</option>';
+                                    }
+                                    ?>
+                                </select></div>
+                        </div>
                     <?php } ?>
                     <div class="row">
                         <div class="col-12">
@@ -978,7 +980,7 @@
         $("#notify .message").html("<strong>Processing</strong>: .....");
         $("#notify").removeClass("alert-danger").addClass("alert-primary").fadeIn();
         $("html, body").animate({scrollTop: $('body').offset().top - 100}, 1000);
-        var o_data = $("#data_form").serialize() + '&p_amount=' + accounting.unformat($('#p_amount').val(), accounting.settings.number.decimal) + '&p_method=' + $("#p_method option:selected").val() + '&type=' + $(this).attr('data-type') + '&printnow=1'+ '&account=' + $("#p_account option:selected").val() ;
+        var o_data = $("#data_form").serialize() + '&p_amount=' + accounting.unformat($('#p_amount').val(), accounting.settings.number.decimal) + '&p_method=' + $("#p_method option:selected").val() + '&type=' + $(this).attr('data-type') + '&printnow=1' + '&account=' + $("#p_account option:selected").val();
         var action_url = $('#action-url').val();
         addObject(o_data, action_url);
         setTimeout(
@@ -1092,21 +1094,21 @@
                         $('#posp0').click();
                         $('#v2_search_bar').val('');
                         $('#v2_search_bar').focus();
-						   var whr = $('#v2_warehouses option:selected').val();
-        var cat = $('#v2_categories option:selected').val();
-        $.ajax({
-            type: "POST",
-            url: baseurl + 'search_products/v2_pos_search',
-            data: 'wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash,
-            beforeSend: function () {
-                $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
-            },
-            success: function (data) {
+                        var whr = $('#v2_warehouses option:selected').val();
+                        var cat = $('#v2_categories option:selected').val();
+                        $.ajax({
+                            type: "POST",
+                            url: baseurl + 'search_products/v2_pos_search',
+                            data: 'wid=' + whr + '&cid=' + cat + '&' + crsf_token + '=' + crsf_hash,
+                            beforeSend: function () {
+                                $("#customer-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
+                            },
+                            success: function (data) {
 
-                $("#pos_item").html(data);
+                                $("#pos_item").html(data);
 
-            }
-        });
+                            }
+                        });
                     }, 700);
             }
         });

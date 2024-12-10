@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -29,21 +29,30 @@ class Supplier_model extends CI_Model
     var $inv_column_order = array(null, 'tid', 'name', 'invoicedate', 'total', 'status', null);
     var $inv_column_search = array('tid', 'name', 'invoicedate', 'total');
     var $order = array('id' => 'desc');
-    var $inv_order = array('geopos_purchase.tid' => 'desc');
+    var $inv_order = array('geopos_purchase.id' => 'desc');
 
 
     private function _get_datatables_query($id = '')
     {
 
-        $this->db->from($this->table);
-        if ($this->aauth->get_user()->loc) {
-            $this->db->where('loc', $this->aauth->get_user()->loc);
-        } elseif (!BDATA) {
-            $this->db->where('loc', 0);
-        }
+        $this->db->select('geopos_supplier.*,SUM(geopos_purchase.total) AS total,SUM(geopos_purchase.pamnt) AS pamnt');
+        $this->db->from('geopos_supplier');
+        $this->db->join('geopos_purchase', 'geopos_supplier.id = geopos_purchase.csd', 'left');
+       
         if ($id != '') {
-            $this->db->where('gid', $id);
+            $this->db->where('geopos_supplier.gid', $id);
         }
+        $this->db->group_by('geopos_supplier.id');
+        $this->db->order_by('total', 'desc');
+        // $this->db->from($this->table);
+        // if ($this->aauth->get_user()->loc) {
+        //     $this->db->where('loc', $this->aauth->get_user()->loc);
+        // } elseif (!BDATA) {
+        //     $this->db->where('loc', 0);
+        // }
+        // if ($id != '') {
+        //     $this->db->where('gid', $id);
+        // }
         $i = 0;
 
         foreach ($this->column_search as $item) // loop column
@@ -82,7 +91,9 @@ class Supplier_model extends CI_Model
         if ($this->input->post('length') != -1)
             $this->db->limit($this->input->post('length'), $this->input->post('start'));
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('loc', $this->aauth->get_user()->loc);
+            $this->db->where('geopos_supplier.loc', $this->aauth->get_user()->loc);
+        } elseif (!BDATA) {
+            $this->db->where('geopos_supplier.loc', 0);
         }
         $query = $this->db->get();
         return $query->result();
@@ -92,9 +103,9 @@ class Supplier_model extends CI_Model
     {
         $this->_get_datatables_query();
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('loc', $this->aauth->get_user()->loc);
+            $this->db->where('geopos_supplier.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('loc', 0);
+            $this->db->where('geopos_supplier.loc', 0);
         }
         if ($id != '') {
             $this->db->where('gid', $id);
@@ -108,9 +119,9 @@ class Supplier_model extends CI_Model
     {
         $this->_get_datatables_query();
         if ($this->aauth->get_user()->loc) {
-            $this->db->where('loc', $this->aauth->get_user()->loc);
+            $this->db->where('geopos_supplier.loc', $this->aauth->get_user()->loc);
         } elseif (!BDATA) {
-            $this->db->where('loc', 0);
+            $this->db->where('geopos_supplier.loc', 0);
         }
         $query = $this->db->get();
         if ($id != '') {
@@ -141,6 +152,16 @@ class Supplier_model extends CI_Model
         $this->db->from('geopos_transactions');
         $this->db->where('payerid', $custid);
         $this->db->where('ext', 1);
+        $query = $this->db->get();
+        return $query->row_array();
+    }
+
+    public function due_details($custid)
+    {
+
+        $this->db->select('SUM(total) AS total,SUM(pamnt) AS pamnt,SUM(discount) AS discount,');
+        $this->db->from('geopos_purchase');
+        $this->db->where('csd', $custid);
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -504,5 +525,15 @@ class Supplier_model extends CI_Model
         }
     }
 
+    public function count_allDue($id = '')
+    {
+        $query = $this->db->query("SELECT SUM(geopos_purchase.total) AS total,SUM(geopos_purchase.pamnt) AS pamnt
+        FROM geopos_purchase
+        LEFT JOIN geopos_supplier ON geopos_supplier.id=geopos_purchase.csd
+        WHERE geopos_purchase.status NOT IN ('paid', 'canceled')
+        GROUP BY geopos_purchase.csd;");
+        $result = $query->result_array();
+        return $result;
+    }
 
 }

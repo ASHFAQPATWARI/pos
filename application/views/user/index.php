@@ -14,7 +14,7 @@
                                 <div class="card-title text-center">
                                     <img class=" mt-1"
                                          src="<?php echo base_url('userfiles/company/') . $this->config->item('logo'); ?>"
-                                         alt="logo" style="max-height: 10rem;">
+                                         alt="logo" style="max-height: 10rem;  max-width: 10rem;">
                                 </div>
                                 <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
                                     <span><?php echo $this->lang->line('employee_login_panel') ?></span></h6>

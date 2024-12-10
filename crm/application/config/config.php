@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 
 // $config['base_url'] = 'http://18.219.104.78/crm/';
-$config['base_url'] = 'http://3.128.254.33/crm/';
+$config['base_url'] = 'http://localhost:8888/alhasanipos/crm/';
 
 /*
 |--------------------------------------------------------------------------

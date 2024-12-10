@@ -354,6 +354,8 @@
 
                         <input type="hidden" value="<?php
                         $tt = 0;
+
+                        if($invoice['shipping']==0)  $invoice['shipping']=1;
                         if ($invoice['ship_tax_type'] == 'incl') $tt = @number_format(($invoice['shipping'] - $invoice['ship_tax']) / $invoice['shipping'], 2, '.', '');
                         echo amountFormat_general(number_format((($invoice['ship_tax'] / $invoice['shipping']) * 100) + $tt, 3, '.', '')); ?>"
                                name="shipRate" id="ship_rate">

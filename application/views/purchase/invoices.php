@@ -138,7 +138,7 @@
                 var start_date = $('#start_date').val();
                 var end_date = $('#end_date').val();
                 if (start_date != '' && end_date != '') {
-                    $('#po').DataTable().destroy();
+                    $('#po').DataTable().page('first').state.save().destroy();
                     draw_data(start_date, end_date);
                 } else {
                     alert("Date range is Required");

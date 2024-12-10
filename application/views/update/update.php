@@ -8,7 +8,6 @@
         </div>
         <div class="card-body">
             <h5>Application Update</h5>
-
             <hr>
             <h5>Current Version <?php echo $version ?> /
                 <small>Build:<?php echo $build ?></small>

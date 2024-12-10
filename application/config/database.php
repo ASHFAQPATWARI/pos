@@ -6,7 +6,7 @@ $query_builder = TRUE;
 $hostname ='localhost';
 $username ='fk';
 $password ='';
-$database ='fkposserver';
+$database ='alhasanipos';
 
 $db['default'] = array(
 	'dsn'	=> '',

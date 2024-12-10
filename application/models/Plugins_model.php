@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -87,15 +87,14 @@ class Plugins_model extends CI_Model
 
     public function m_update_api($id, $key1, $key2 = 0, $url = '', $method = 0, $other = '', $enable = 0,$m=true)
     {
-        $data = array(
-            'key1' => $key1,
-            'key2' => $key2,
-            'url' => $url,
-            'method' => $method,
-            'other' => $other,
-            'active' => $enable
+        $data = array();
 
-        );
+        if(isset($key1)) $data['key1']=$key1;
+        if(isset($key2)) $data['key2']=$key2;
+        if(isset($url)) $data['url']=$url;
+        if(isset($method)) $data['method']=$method;
+        if(isset($other)) $data['other']=$other;
+         if(isset($enable)) $data['active']=$enable;
 
         $this->db->set($data);
         $this->db->where('id', $id);

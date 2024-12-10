@@ -60,3 +60,6 @@
 .reverse_align {
     text-align: left;
 }
+.select2{
+        min-width: 14rem;
+}

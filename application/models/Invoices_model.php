@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -75,6 +75,18 @@ class Invoices_model extends CI_Model
         $this->db->select('*');
         $this->db->from('geopos_invoice_items');
         $this->db->where('tid', $id);
+        $query = $this->db->get();
+        return $query->result_array();
+
+    }
+
+        public function items_with_product($id)
+    {
+
+        $this->db->select('geopos_invoice_items.*,geopos_products.qty AS alert');
+        $this->db->from('geopos_invoice_items');
+        $this->db->where('tid', $id);
+        $this->db->join('geopos_products', 'geopos_products.pid = geopos_invoice_items.pid', 'left');
         $query = $this->db->get();
         return $query->result_array();
 

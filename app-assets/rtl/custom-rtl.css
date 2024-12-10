@@ -130,3 +130,7 @@ pre[class*='language-']
 {
     float: right !important;
 }
+
+.select2{
+        min-width: 14rem;
+}

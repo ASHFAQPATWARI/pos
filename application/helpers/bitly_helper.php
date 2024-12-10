@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -23,7 +23,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  * Simple PHP library for interacting with the v3 bit.ly api (only deals with
  * JSON format, but supports new OAuth endpoints).
  * REQUIREMENTS: PHP, Curl, JSON
- * 
+ *
  * @link https://github.com/Falicon/BitlyPHP
  * @author Kevin Marshall <info@falicon.com>
  */
@@ -98,27 +98,27 @@ function bitly_oauth_access_token($code, $redirect, $client_id, $client_secret) 
  *   - access_token: The OAuth access token for specified user.
  *
  */
- 
+
 function bitly_oauth_access_token_via_password($username, $password, $client_id, $client_secret) {
   $results = array();
   $url = bitly_oauth_access_token . "access_token";
-  
+
   $headers = array();
   $headers[] = 'Authorization: Basic '.base64_encode($client_id . ":" . $client_secret);
-    
+
   $params = array();
   $params['grant_type'] = "password";
   $params['username'] = $username;
   $params['password'] = $password;
-  
+
   $output = bitly_post_curl($url, $params, $headers);
-  
+
   $decoded_output = json_decode($output,1);
 
   $results = array(
   	"access_token" => $decoded_output['access_token']
   );
-  
+
   return $results;
 }
 
@@ -220,11 +220,11 @@ function bitly_post_curl($uri, $fields, $header_array = array()) {
   rtrim($fields_string,'&');
   try {
     $ch = curl_init($uri);
-    
+
     if(is_array($header_array) && !empty($header_array)){
     	curl_setopt($ch, CURLOPT_HTTPHEADER, $header_array);
     }
-    
+
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch,CURLOPT_POST,count($fields));
     curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);

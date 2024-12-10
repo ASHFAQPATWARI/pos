@@ -55,6 +55,7 @@
     <script src="<?php echo assets_url('assets/myjs/mousetrap.min.js') . APPVER; ?>"></script>
     <script src="<?php echo assets_url('assets/myjs/datepicker.min.js') . APPVER; ?>"></script>
     <script src="<?php echo assets_url(); ?>assets/portjs/accounting.min.js" type="text/javascript"></script>
+      <script src="<?php echo assets_url(); ?>assets/portjs/printThis.js" type="text/javascript"></script>
     <?php accounting() ?>
 </head>
 <body class="horizontal-layout horizontal-menu content-left-sidebar <?php if ($s_mode) echo 'chat-application'; ?>  menu-expanded"
@@ -70,8 +71,8 @@
         <div class="navbar-header">
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item mobile-menu d-md-none mr-auto"><a
-                            class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i
-                                class="ft-menu font-large-1"></i></a></li>
+                            class="nav-link nav-menu-main hidden-xs" href="<?= base_url() ?>dashboard/"><i
+                                class="ft-home font-large-1"></i></a></li>
                 <li class="nav-item d-md-none"><a class="navbar-brand" href="<?= base_url() ?>dashboard/"><img
                                 class="brand-logo" alt="logo"
                                 src="<?php echo base_url(); ?>userfiles/theme/logo-header.png">
@@ -83,15 +84,15 @@
         <div class="navbar-container content">
             <div class="collapse navbar-collapse" id="navbar-mobile">
                 <ul class="nav navbar-nav mr-auto float-left">
-                    <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs"
-                                                              href="#"><i class="ft-menu"></i></a></li>
+                    <li class="nav-item d-none d-md-block"><a class="nav-link font-medium-2 hidden-xs"
+                                                              href="<?= base_url() ?>dashboard"><i class="ft-home"></i></a></li>
 
-                    <li class="nav-item d-none d-md-block"><a class="nav-link nav-link-expand" href="#"><i
+                    <li class="nav-item d-none d-md-block"><a onclick="alert('Press F11 to Full Screen in Google Chrome')" class="nav-link nav-link-expand hidden-sm" title="Press F11 to Full Screen" ><i
                                     class="ficon ft-maximize"></i></a></li>
                     <li class="nav-item d-none d-md-block nav-link "><a href="<?= base_url() ?>dashboard"
                                                                         class="btn btn-amber btn-md t_tooltip"
-                                                                        title="Access POS"><i
-                                    class="icon-speedometer"></i><?php echo $this->lang->line('Dashboard') ?> </a>
+                                                                        title="Dashboard"><i
+                                    class="icon-speedometer"></i> </a>
                     </li>
                     <li class="nav-item d-none d-md-block nav-link "><a class="btn btn-blue btn-md t_tooltip"
                                                                         title="View Register" data-toggle="modal"

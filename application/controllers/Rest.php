@@ -1,7 +1,7 @@
 <?php
 /**
  * Geo POS -  Accounting,  Invoicing  and CRM Application
- * Copyright (c) Rajesh Dukiya. All Rights Reserved
+ * Copyright (c) UltimateKode. All Rights Reserved
  * ***********************************************************************
  *
  *  Email: support@ultimatekode.com
@@ -49,6 +49,7 @@ class Rest extends REST_Controller
         $this->methods['users_post']['limit'] = 100; // 100 requests per hour per user/key
         $this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
         $this->load->model('restservice_model', 'restservice');
+        $this->load->library("Aauth");
     }
 
     public function clients_get()
@@ -262,11 +263,22 @@ class Rest extends REST_Controller
             $token = hash_hmac('ripemd160', $tid, $this->config->item('encryption_key'));
             $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_.png';
 
-            $qrCode = new QrCode(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token));
+            $qrCode = QrCode::create(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token))
+                ->setEncoding(new Encoding('UTF-8'))
+                ->setSize(300)
+                ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin())
+                ->setForegroundColor(new Color(0, 0, 0))
+                ->setBackgroundColor(new Color(255, 255, 255));
+
+            $writer = new \Endroid\QrCode\Writer\PngWriter();
+            $result = $writer->write($qrCode);
+            $result->saveToFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+
+           // $qrCode = new QrCode(base_url('billing/card?id=' . $tid . '&itype=inv&token=' . $token));
 
 //header('Content-Type: '.$qrCode->getContentType());
 //echo $qrCode->writeString();
-            $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
+          //  $qrCode->writeFile(FCPATH . 'userfiles/pos_temp/' . $data['qrc']);
         }
 
         $this->pheight = 0;
@@ -305,6 +317,34 @@ class Rest extends REST_Controller
         unlink('userfiles/pos_temp/' . $data['qrc']);
         unlink(FCPATH . 'userfiles/pos_temp/' . $file_name . '.pdf');
         $this->set_response(array('w' => 1), REST_Controller::HTTP_OK);
+
+    }
+
+    public function login_post()
+    {
+        $user = $this->post('username');
+        $password = $this->post('password');
+        $remember_me = $this->post('remember_me');
+        $rem = false;
+        if ($remember_me == 'on') {
+            $rem = true;
+        }
+        // $this->set_response([
+        //     'status' => FALSE . $user . '  ' . $password,
+        //     'message' => 'Products could not be found'
+        // ], REST_Controller::HTTP_OK); 
+        if ($this->aauth->login($user, $password, $rem, false)) {
+            $this->set_response([
+                'status' => TRUE . $user . '  ' . $password,
+                'message' => 'login success'
+            ], REST_Controller::HTTP_OK); 
+        } else {
+            $this->set_response([
+                'status' => FALSE . $user . '  ' . $password,
+                'message' => 'login fail'
+            ], REST_Controller::HTTP_OK); 
+            
+        }
 
     }
 
